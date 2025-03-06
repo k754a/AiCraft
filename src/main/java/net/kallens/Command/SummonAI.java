@@ -2,6 +2,7 @@ package net.kallens.Command;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import com.mojang.authlib.GameProfile;
@@ -17,15 +18,31 @@ public class SummonAI {
     }
 
     private static int summon(CommandSourceStack source) {
-        ServerLevel world = source.getLevel(); // Get the world
-        GameProfile profile = new GameProfile(UUID.randomUUID(), "AI");
+        try {
+            ServerLevel world = source.getLevel(); // Get the world
+            ServerPlayer server = source.getPlayerOrException(); // Get the player executing the command
 
-        // Create a fake player without a network connection
-        ServerPlayer fakePlayer = new ServerPlayer(source.getServer(), world, profile, null);
+            GameProfile profile = new GameProfile(UUID.randomUUID(), "AI");
 
-        // Add the fake player to the world
-        world.addFreshEntity(fakePlayer);
+            // Create a fake player with a minimal constructor setup
+            ServerPlayer fakePlayer = new ServerPlayer(
+                    source.getServer(),
+                    world,
+                    profile,
+                    null
+            );
 
-        return 1;
+
+            fakePlayer.setPos(server.getX(), server.getY(), server.getZ());
+
+
+            world.addFreshEntity(fakePlayer);
+
+            return 1;
+        } catch (Exception e) {
+
+            source.sendFailure(Component.literal("Failed to spawn AI player: " + e.getMessage()));
+            return 0;
+        }
     }
 }
