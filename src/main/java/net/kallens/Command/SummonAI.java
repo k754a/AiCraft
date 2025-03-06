@@ -5,10 +5,12 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.entity.player.ChatVisiblity;
 import net.minecraft.world.entity.HumanoidArm;  // adjust if needed
 
@@ -44,6 +46,15 @@ public class SummonAI {
                     world,
                     profile,
                     dummyInfo
+            );
+
+
+
+            fakePlayer.connection = new ServerGamePacketListenerImpl(
+                    source.getServer(),
+                    new Connection(null), // Dummy connection; adjust as needed
+                    fakePlayer,
+                    null
             );
 
             fakePlayer.setPos(serverPlayer.getX(), serverPlayer.getY(), serverPlayer.getZ());
