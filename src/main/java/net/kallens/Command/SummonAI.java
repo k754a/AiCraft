@@ -7,7 +7,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
-
+import net.minecraft.server.level.ClientInformation;
+import java.lang.reflect.Constructor;
 import java.util.UUID;
 
 public class SummonAI {
@@ -19,30 +20,30 @@ public class SummonAI {
 
     private static int summon(CommandSourceStack source) {
         try {
-            ServerLevel world = source.getLevel(); // Get the world
-            ServerPlayer server = source.getPlayerOrException(); // Get the player executing the command
-
+            ServerLevel world = source.getLevel();
+            ServerPlayer server = source.getPlayerOrException();
             GameProfile profile = new GameProfile(UUID.randomUUID(), "AI");
 
-            // Create a fake player with a minimal constructor setup
+
+            Constructor<ClientInformation> ciConstructor = ClientInformation.class.getDeclaredConstructor(String.class, boolean.class, boolean.class, String.class);
+            ciConstructor.setAccessible(true);
+            ClientInformation dummyInfo = ciConstructor.newInstance("127.0.0.1", true, false, "dummy");
+
+
             ServerPlayer fakePlayer = new ServerPlayer(
                     source.getServer(),
                     world,
                     profile,
-                    null
+                    dummyInfo
             );
 
-
             fakePlayer.setPos(server.getX(), server.getY(), server.getZ());
-
-
             world.addFreshEntity(fakePlayer);
-
             return 1;
         } catch (Exception e) {
-
             source.sendFailure(Component.literal("Failed to spawn AI player: " + e.getMessage()));
             return 0;
         }
     }
 }
+
