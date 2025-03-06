@@ -30,7 +30,7 @@ public class SummonAI {
 
             GameProfile profile = new GameProfile(UUID.randomUUID(), "AI");
 
-            // Create client information with valid parameters
+            // Create client information
             ClientInformation dummyInfo = new ClientInformation(
                     "en_us",
                     10,
@@ -42,7 +42,7 @@ public class SummonAI {
                     false
             );
 
-            // Create the AI player
+            // Create AI player
             ServerPlayer fakePlayer = new ServerPlayer(
                     source.getServer(),
                     world,
@@ -50,11 +50,26 @@ public class SummonAI {
                     dummyInfo
             );
 
-            // Position the AI player near the command source
+            // Assign a dummy cookie/connection so fakePlayer.connection isn't null
+            CommonListenerCookie dummyCookie = new CommonListenerCookie(
+                    profile,    // GameProfile
+                    0,          // Int (e.g., placeholder ping)
+                    dummyInfo,  // ClientInformation
+                    false       // Boolean (e.g., isUtility)
+            );
+
+            fakePlayer.connection = new ServerGamePacketListenerImpl(
+                    source.getServer(),
+                    new Connection(null), // Dummy Connection
+                    fakePlayer,
+                    dummyCookie
+            );
+
+            // Position and add the AI player to the world
             fakePlayer.setPos(serverPlayer.getX(), serverPlayer.getY(), serverPlayer.getZ());
             world.addFreshEntity(fakePlayer);
 
-            // Use the supplier-based signature for sendSuccess
+            // Confirm spawn
             source.sendSuccess(() -> Component.literal("AI player spawned successfully."), true);
 
             return 1;
