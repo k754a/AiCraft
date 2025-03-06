@@ -1,34 +1,43 @@
 package net.kallens.Command;
 
+import java.util.UUID;
+import com.mojang.authlib.GameProfile;
+import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import com.mojang.authlib.GameProfile;
-import com.mojang.brigadier.CommandDispatcher;
-import net.minecraft.server.level.ClientInformation;
-import java.lang.reflect.Constructor;
-import java.util.UUID;
+import net.minecraft.world.entity.player.ChatVisiblity;
+import net.minecraft.world.entity.HumanoidArm;  // adjust if needed
 
 public class SummonAI {
     public SummonAI(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("ai").then(Commands.literal("spawn").executes((command) -> {
-            return summon(command.getSource());
-        })));
+        dispatcher.register(
+                Commands.literal("ai")
+                        .then(Commands.literal("spawn").executes(context -> summon(context.getSource())))
+        );
     }
 
     private static int summon(CommandSourceStack source) {
         try {
             ServerLevel world = source.getLevel();
-            ServerPlayer server = source.getPlayerOrException();
+            ServerPlayer serverPlayer = source.getPlayerOrException();
+
             GameProfile profile = new GameProfile(UUID.randomUUID(), "AI");
 
-
-            Constructor<ClientInformation> ciConstructor = ClientInformation.class.getDeclaredConstructor(String.class, boolean.class, boolean.class, String.class);
-            ciConstructor.setAccessible(true);
-            ClientInformation dummyInfo = ciConstructor.newInstance("127.0.0.1", true, false, "dummy");
-
+            // Create client information with valid parameters for your MC version
+            ClientInformation dummyInfo = new ClientInformation(
+                    "en_us",                  // language
+                    10,                       // view distance
+                    ChatVisiblity.FULL,       // chat visibility
+                    true,                     // chat colors
+                    127,                      // displayed skin parts
+                    HumanoidArm.RIGHT,        // main hand
+                    false,                    // textFilteringEnabled
+                    false                     // allowsListing
+            );
 
             ServerPlayer fakePlayer = new ServerPlayer(
                     source.getServer(),
@@ -37,13 +46,14 @@ public class SummonAI {
                     dummyInfo
             );
 
-            fakePlayer.setPos(server.getX(), server.getY(), server.getZ());
+            fakePlayer.setPos(serverPlayer.getX(), serverPlayer.getY(), serverPlayer.getZ());
             world.addFreshEntity(fakePlayer);
+
             return 1;
         } catch (Exception e) {
             source.sendFailure(Component.literal("Failed to spawn AI player: " + e.getMessage()));
+            e.printStackTrace();
             return 0;
         }
     }
 }
-
