@@ -32,17 +32,17 @@ public class SummonAI {
 
             // Create client information with valid parameters
             ClientInformation dummyInfo = new ClientInformation(
-                    "en_us",               // language
-                    10,                    // view distance
-                    ChatVisiblity.FULL,    // chat visibility
-                    true,                  // chat colors
-                    127,                   // displayed skin parts
-                    HumanoidArm.RIGHT,     // main hand
-                    false,                 // textFilteringEnabled
-                    false                  // allowsListing
+                    "en_us",
+                    10,
+                    ChatVisiblity.FULL,
+                    true,
+                    127,
+                    HumanoidArm.RIGHT,
+                    false,
+                    false
             );
 
-            // Create a fake player
+            // Create the AI player
             ServerPlayer fakePlayer = new ServerPlayer(
                     source.getServer(),
                     world,
@@ -50,25 +50,12 @@ public class SummonAI {
                     dummyInfo
             );
 
-            // Create the cookie matching your constructor signature (GameProfile, int, ClientInformation, boolean)
-            CommonListenerCookie dummyCookie = new CommonListenerCookie(
-                    profile,       // The GameProfile
-                    0,             // An int - perhaps latency/ping or a placeholder
-                    dummyInfo,     // Your ClientInformation
-                    false          // A boolean - possibly 'isUtility' or similar
-            );
-
-            // Create the network listener impl
-            fakePlayer.connection = new ServerGamePacketListenerImpl(
-                    source.getServer(),
-                    new Connection(null), // Dummy connection
-                    fakePlayer,
-                    dummyCookie
-            );
-
-            // Position the new player
+            // Position the AI player near the command source
             fakePlayer.setPos(serverPlayer.getX(), serverPlayer.getY(), serverPlayer.getZ());
             world.addFreshEntity(fakePlayer);
+
+            // Use the supplier-based signature for sendSuccess
+            source.sendSuccess(() -> Component.literal("AI player spawned successfully."), true);
 
             return 1;
         } catch (Exception e) {
