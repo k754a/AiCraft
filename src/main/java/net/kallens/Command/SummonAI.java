@@ -5,78 +5,48 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ClientInformation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.network.CommonListenerCookie;
-import net.minecraft.server.network.ServerGamePacketListenerImpl;
-import net.minecraft.world.entity.player.ChatVisiblity;
-import net.minecraft.world.entity.HumanoidArm;
+import net.minecraftforge.common.util.FakePlayer;
+import net.minecraftforge.common.util.FakePlayerFactory;
 
 public class SummonAI {
     public SummonAI(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(
                 Commands.literal("ai")
-                        .then(Commands.literal("spawn").executes(context -> summon(context.getSource())))
+                        .then(Commands.literal("spawn")
+                                .executes(context -> summon(context.getSource()))
+                        )
         );
     }
 
     private static int summon(CommandSourceStack source) {
         try {
+            // Get server and world from the command source
+            MinecraftServer server = source.getServer();
             ServerLevel world = source.getLevel();
-            ServerPlayer serverPlayer = source.getPlayerOrException();
 
-            GameProfile profile = new GameProfile(UUID.randomUUID(), "AI");
+            // Define the fake player's name (hardcoded for simplicity)
+            String name = "AI_Player";
 
-            // Create client information
-            ClientInformation dummyInfo = new ClientInformation(
-                    "en_us",
-                    10,
-                    ChatVisiblity.FULL,
-                    true,
-                    127,
-                    HumanoidArm.RIGHT,
-                    false,
-                    false
-            );
+            // Create a GameProfile with a random UUID and the name
+            GameProfile profile = new GameProfile(UUID.randomUUID(), name);
 
-            // Create AI player
-            ServerPlayer fakePlayer = new ServerPlayer(
-                    source.getServer(),
-                    world,
-                    profile,
-                    dummyInfo
-            );
+            // Spawn the fake player using FakePlayerFactory
+            FakePlayer fakePlayer = FakePlayerFactory.get(world, profile);
 
-            // Assign a dummy cookie/connection so fakePlayer.connection isn't null
-            CommonListenerCookie dummyCookie = new CommonListenerCookie(
-                    profile,    // GameProfile
-                    0,          // Int (e.g., placeholder ping)
-                    dummyInfo,  // ClientInformation
-                    false       // Boolean (e.g., isUtility)
-            );
-
-            fakePlayer.connection = new ServerGamePacketListenerImpl(
-                    source.getServer(),
-                    new Connection(null), // Dummy Connection
-                    fakePlayer,
-                    dummyCookie
-            );
-
-            // Position and add the AI player to the world
-            fakePlayer.setPos(serverPlayer.getX(), serverPlayer.getY(), serverPlayer.getZ());
+            // Add the fake player to the world
             world.addFreshEntity(fakePlayer);
 
-            // Confirm spawn
-            source.sendSuccess(() -> Component.literal("AI player spawned successfully."), true);
-
-            return 1;
+            // Send success message to the command executor
+            source.sendSuccess(Component.literal("AI player '" + name + "' spawned successfully"), false);
+            return 1; // Command success
         } catch (Exception e) {
+            // Send failure message if something goes wrong
             source.sendFailure(Component.literal("Failed to spawn AI player: " + e.getMessage()));
             e.printStackTrace();
-            return 0;
+            return 0; // Command failure
         }
     }
 }
