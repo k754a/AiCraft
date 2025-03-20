@@ -12,8 +12,13 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
+import org.openjdk.nashorn.api.tree.WhileLoopTree;
+
+import static com.mojang.text2speech.Narrator.LOGGER;
 
 public class SummonAI {
+
+    SettingsScreen settingsScreen = new SettingsScreen(Component.literal("Settings"));
     public SummonAI(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(
                 Commands.literal("ai")
@@ -21,6 +26,8 @@ public class SummonAI {
                                 .executes(context -> summon(context.getSource()))
                         )
         );
+        //loop();
+
         dispatcher.register(
                 Commands.literal("ai")
                         .then(Commands.literal("settings")
@@ -46,6 +53,7 @@ public class SummonAI {
     private static int settings(CommandSourceStack source) {
         try {
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> {
+
             // Client-side code to open the settings GUI
             Minecraft.getInstance().setScreen(new SettingsScreen(Component.literal("Settings")));
             return null;
@@ -55,6 +63,14 @@ public class SummonAI {
         } catch (Exception e) {;
             return 0;
         }
+    }
+
+
+    public void loop()
+    {
+
+       settingsScreen.run();
+
     }
 
 
