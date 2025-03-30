@@ -9,16 +9,20 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.world.entity.player.Player;
+import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
 import java.awt.event.KeyEvent;
+import java.util.*;
 
 import static com.mojang.text2speech.Narrator.LOGGER;
 
 public class SettingsScreen extends Screen {
-    public EditBox textBox;
+    public List<EditBox> textBox = new ArrayList<>();
+
+
 
     public SettingsScreen(Component title) {
         super(title);
@@ -28,23 +32,24 @@ public class SettingsScreen extends Screen {
     protected void init() {
 
         int boxWidth = 200;
+        textBox.clear();
+        EditBox box = new EditBox(this.font, this.width / 2 - boxWidth / 2, this.height / 2 - 10, boxWidth, 20, Component.literal(""));
+        textBox.add(box);
 
-        textBox = new EditBox(this.font, this.width / 2 - boxWidth / 2, this.height / 2 - 10, boxWidth, 20, Component.literal(""));
-
-        this.addWidget(textBox);
+        this.addWidget(textBox.get(0));
 
     }
 
     public void run(){
 
 
-        if(this.textBox != null)
-        {
-
-            //LOGGER.info("Box input test: " + test);
-
-
-        }
+//        if(textBox.get(0) != null)
+//        {
+//
+//            //LOGGER.info("Box input test: " + test);
+//
+//
+//        }
 
 
 
@@ -53,7 +58,7 @@ public class SettingsScreen extends Screen {
 
 
     @Override
- 
+
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
         // Call the new renderBackground method that accepts GuiGraphics:
         this.renderBackground(guiGraphics);
@@ -62,7 +67,7 @@ public class SettingsScreen extends Screen {
         // Call super.render with GuiGraphics:
         super.render(guiGraphics, mouseX, mouseY, partialTicks);
         // Render the text box using GuiGraphics:
-        textBox.render(guiGraphics, mouseX, mouseY, partialTicks);
+        textBox.get(0).render(guiGraphics, mouseX, mouseY, partialTicks);
     }
 
     private void renderBackground(GuiGraphics guiGraphics) {
@@ -82,10 +87,10 @@ public class SettingsScreen extends Screen {
 
             sendcasts("AI main connection has been updated!", player.createCommandSourceStack());
 
-            test = textBox.getValue();
+            test = textBox.get(0).getValue();
             return super.keyPressed(256, scanCode, modifiers);
         }
-        if (textBox.keyPressed(keyCode, scanCode, modifiers)) {
+        if (textBox.get(0).keyPressed(keyCode, scanCode, modifiers)) {
             return true;
         }
 

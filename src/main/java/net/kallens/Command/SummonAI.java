@@ -20,20 +20,28 @@ public class SummonAI {
 
     SettingsScreen settingsScreen = new SettingsScreen(Component.literal("Settings"));
     public SummonAI(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(
-                Commands.literal("ai")
-                        .then(Commands.literal("spawn")
-                                .executes(context -> summon(context.getSource()))
-                        )
-        );
+        if(Minecraft.getInstance() != null)
+        {
+            dispatcher.register(
+                    Commands.literal("ai")
+                            .then(Commands.literal("spawn")
+                                    .executes(context -> summon(context.getSource()))
+                            )
+
+                            .then(Commands.literal("settings")
+
+                                    .executes(context -> settings(context.getSource()))
+                            )
+
+            );
+        }
+
+
+
+
         //loop();
 
-        dispatcher.register(
-                Commands.literal("ai")
-                        .then(Commands.literal("settings")
-                                .executes(context -> settings(context.getSource()))
-                        )
-        );
+
     }
 
     private static int summon(CommandSourceStack source) {
