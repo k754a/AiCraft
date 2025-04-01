@@ -33,10 +33,17 @@ public class SettingsScreen extends Screen {
 
         int boxWidth = 200;
         textBox.clear();
-        EditBox box = new EditBox(this.font, this.width / 2 - boxWidth / 2, this.height / 2 - 10, boxWidth, 20, Component.literal(""));
-        textBox.add(box);
 
-        this.addWidget(textBox.get(0));
+        for(int i=0; i<10;i++)
+        {
+            EditBox box = new EditBox(this.font, this.width / 2 - boxWidth / 2, this.height / 2 - 10, boxWidth, 20 + (i + 20), Component.literal(""));
+            textBox.add(box);
+
+            this.addWidget(textBox.get(0));
+            LOGGER.info("Test: " + textBox.get(0));
+
+        }
+
 
     }
 
@@ -67,7 +74,10 @@ public class SettingsScreen extends Screen {
         // Call super.render with GuiGraphics:
         super.render(guiGraphics, mouseX, mouseY, partialTicks);
         // Render the text box using GuiGraphics:
-        textBox.get(0).render(guiGraphics, mouseX, mouseY, partialTicks);
+        for(int i=0; i<10;i++) {
+            textBox.get(i).render(guiGraphics, mouseX, mouseY, partialTicks);
+        }
+
     }
 
     private void renderBackground(GuiGraphics guiGraphics) {
