@@ -3,6 +3,7 @@ package net.kallens.Command;
 import net.kallens.events.IsKeyPressed;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.commands.CommandSourceStack;
@@ -22,21 +23,26 @@ import static com.mojang.text2speech.Narrator.LOGGER;
 public class SettingsScreen extends Screen {
     public List<EditBox> textBox = new ArrayList<>();
 
+    Button enterbutton;
+
 
 
     public SettingsScreen(Component title) {
         super(title);
     }
     String test;
+
+    float textboxeslist = 2;
     @Override
     protected void init() {
 
         int boxWidth = 200;
         textBox.clear();
 
-        for(int i=0; i<10;i++)
+        for(int i=0; i<textboxeslist;i++)
         {
-            EditBox box = new EditBox(this.font, this.width / 2 - boxWidth / 2, this.height / 2 - 10, boxWidth, 20 + (i + 20), Component.literal(""));
+            EditBox box = new EditBox(this.font, this.width / 2 - boxWidth / 2, this.height / 2 - 10, boxWidth, 20 , Component.literal(""));
+
             textBox.add(box);
 
             this.addWidget(textBox.get(0));
@@ -74,7 +80,7 @@ public class SettingsScreen extends Screen {
         // Call super.render with GuiGraphics:
         super.render(guiGraphics, mouseX, mouseY, partialTicks);
         // Render the text box using GuiGraphics:
-        for(int i=0; i<10;i++) {
+        for(int i=0; i<textboxeslist;i++) {
             textBox.get(i).render(guiGraphics, mouseX, mouseY, partialTicks);
         }
 
@@ -109,3 +115,4 @@ public class SettingsScreen extends Screen {
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 }
+
