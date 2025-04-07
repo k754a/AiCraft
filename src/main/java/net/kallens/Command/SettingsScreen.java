@@ -39,6 +39,17 @@ public class SettingsScreen extends Screen {
         int boxWidth = 200;
         textBox.clear();
 
+
+//         enterbutton = new Button(
+//                16, 22,
+//                98, 20,
+//                // Text shown on the button
+//                "text",
+//                // Action performed when the button is pressed
+//                button -> {
+//                    System.out.println("button clicked");
+//                }
+//        );
         for(int i=0; i<textboxeslist;i++)
         {
             EditBox box = new EditBox(this.font, this.width / 2 - boxWidth / 2, this.height / 2 - 10, boxWidth, 20 , Component.literal(""));
@@ -89,13 +100,18 @@ public class SettingsScreen extends Screen {
     private void renderBackground(GuiGraphics guiGraphics) {
 
     }
-    Player player = Minecraft.getInstance().player;
+
+    Player player;
     void sendcasts(String message, CommandSourceStack source)
     {
         source.sendSuccess(() -> Component.literal(message), false);
     }
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if(Minecraft.getInstance() != null)
+        {
+             player = Minecraft.getInstance().player;
+        }
 
         if(keyCode == 257)
         {

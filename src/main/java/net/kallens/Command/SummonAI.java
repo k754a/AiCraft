@@ -8,8 +8,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
+
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import org.openjdk.nashorn.api.tree.WhileLoopTree;
@@ -30,7 +29,7 @@ public class SummonAI {
 
                             .then(Commands.literal("settings")
 
-                                    .executes(context -> settings(context.getSource()))
+                                    .executes(context -> settings())
                             )
 
             );
@@ -44,7 +43,7 @@ public class SummonAI {
 
     }
 
-    private static int summon(CommandSourceStack source) {
+    public static int summon(CommandSourceStack source) {
         try {
 
             source.sendSuccess(() -> Component.literal("AI player '" + "name" + "' spawned successfully"), false);
@@ -58,12 +57,15 @@ public class SummonAI {
 
 
 
-    private static int settings(CommandSourceStack source) {
+    public static int settings() {
         try {
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> {
+            if(Minecraft.getInstance() != null)
+            {
+                // Client-side code to open the settings GUI
+                Minecraft.getInstance().setScreen(new SettingsScreen(Component.literal("Settings")));
+            }
 
-            // Client-side code to open the settings GUI
-            Minecraft.getInstance().setScreen(new SettingsScreen(Component.literal("Settings")));
             return null;
         });
         return 1;
