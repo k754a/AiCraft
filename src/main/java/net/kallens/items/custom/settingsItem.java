@@ -1,11 +1,12 @@
 package net.kallens.items.custom;
 
-import com.mojang.brigadier.CommandDispatcher;
-import net.minecraft.commands.CommandSourceStack;
+
+import net.kallens.Command.SettingsScreen;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.UseOnContext;
-import net.minecraftforge.unsafe.UnsafeFieldAccess;
 
 import static net.kallens.Command.SummonAI.settings;
 
@@ -18,7 +19,17 @@ public class settingsItem extends Item {
     @Override
     public InteractionResult useOn(UseOnContext pContext){
         if(!pContext.getLevel().isClientSide()){
-            settings();
+
+                if (Minecraft.getInstance() != null) {
+                    Minecraft.getInstance().execute(() -> {
+                        if (Minecraft.getInstance().level != null) {
+                            // Client-side code to open the settings GUI
+                            Minecraft.getInstance().setScreen(new SettingsScreen(Component.literal("Settings")));
+                        }
+                    });
+                }
+
+
         }
 
         return InteractionResult.SUCCESS;

@@ -3,7 +3,7 @@ package net.kallens.events;
 import net.kallens.Command.SummonAI;
 import net.kallens.aiminecraft.AiMinecraft;
 import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
+
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.server.command.ConfigCommand;

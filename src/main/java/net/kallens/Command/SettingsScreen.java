@@ -8,15 +8,11 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
-import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.world.entity.player.Player;
-import org.jetbrains.annotations.NotNull;
-import org.lwjgl.glfw.GLFW;
 
-import java.awt.KeyEventDispatcher;
-import java.awt.KeyboardFocusManager;
-import java.awt.event.KeyEvent;
+import net.minecraft.world.entity.player.Player;
+
 import java.util.*;
+import java.util.Collections;
 
 import static com.mojang.text2speech.Narrator.LOGGER;
 
@@ -35,34 +31,36 @@ public class SettingsScreen extends Screen {
     float textboxeslist = 2;
     @Override
     protected void init() {
-
         int boxWidth = 200;
         textBox.clear();
 
-
-//         enterbutton = new Button(
-//                16, 22,
-//                98, 20,
-//                // Text shown on the button
-//                "text",
-//                // Action performed when the button is pressed
-//                button -> {
-//                    System.out.println("button clicked");
-//                }
-//        );
-        for(int i=0; i<textboxeslist;i++)
-        {
-            EditBox box = new EditBox(this.font, this.width / 2 - boxWidth / 2, this.height / 2 - 10, boxWidth, 20 , Component.literal(""));
-
+        for (int i = 0; i < textboxeslist; i++) {
+            EditBox box = new EditBox(this.font, this.width / 2 - boxWidth / 2, this.height / 2 - 10, boxWidth, 20, Component.literal(""));
             textBox.add(box);
-
-            this.addWidget(textBox.get(0));
-            LOGGER.info("Test: " + textBox.get(0));
-
+            this.addWidget(box);
         }
 
+        enterbutton = Button.builder(Component.literal("Submit"), button -> {
 
+                    if (Minecraft.getInstance() != null) {
+                        player = Minecraft.getInstance().player;
+                    }
+
+                    test = textBox.get(0).getValue();
+                    LOGGER.info("Button clicked. Current value: " + test);
+
+                    if (player != null) {
+                        sendcasts("AI token has been u3pdated!", player.createCommandSourceStack());
+                    }
+                })
+                .pos(this.width / 2 - 49, this.height / 2 + 30)
+                .size(100, 100)
+                .build();
+
+
+        this.addWidget(enterbutton);
     }
+
 
     public void run(){
 
@@ -84,13 +82,13 @@ public class SettingsScreen extends Screen {
     @Override
 
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-        // Call the new renderBackground method that accepts GuiGraphics:
+
         this.renderBackground(guiGraphics);
 
         run();
-        // Call super.render with GuiGraphics:
+
         super.render(guiGraphics, mouseX, mouseY, partialTicks);
-        // Render the text box using GuiGraphics:
+
         for(int i=0; i<textboxeslist;i++) {
             textBox.get(i).render(guiGraphics, mouseX, mouseY, partialTicks);
         }
@@ -110,14 +108,14 @@ public class SettingsScreen extends Screen {
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if(Minecraft.getInstance() != null)
         {
-             player = Minecraft.getInstance().player;
+            player = Minecraft.getInstance().player;
         }
 
         if(keyCode == 257)
         {
             LOGGER.info("Enter");
 
-            sendcasts("AI main connection has been updated!", player.createCommandSourceStack());
+            sendcasts("AI token has been updated!", player.createCommandSourceStack());
 
             test = textBox.get(0).getValue();
             return super.keyPressed(256, scanCode, modifiers);
