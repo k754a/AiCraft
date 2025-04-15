@@ -40,26 +40,27 @@ public class SettingsScreen extends Screen {
             this.addWidget(box);
         }
 
-        enterbutton = Button.builder(Component.literal("Submit"), button -> {
-
-                    if (Minecraft.getInstance() != null) {
-                        player = Minecraft.getInstance().player;
-                    }
-
-                    test = textBox.get(0).getValue();
-                    LOGGER.info("Button clicked. Current value: " + test);
-
-                    if (player != null) {
-                        sendcasts("AI token has been u3pdated!", player.createCommandSourceStack());
-                    }
-                })
-                .pos(this.width / 2 - 49, this.height / 2 + 30)
-                .size(100, 100)
-                .build();
-
-
-        this.addWidget(enterbutton);
-    }
+//        enterbutton = Button.builder(Component.literal("Submit"), button -> {
+//
+//                    if (Minecraft.getInstance() != null) {
+//                        player = Minecraft.getInstance().player;
+//                    }
+//
+//                    test = textBox.get(0).getValue();
+//                    LOGGER.info("Button clicked. Current value: " + test);
+//
+//                    if (player != null) {
+//                        sendcasts("AI token has been u3pdated!", player.createCommandSourceStack());
+//                    }
+//                })
+//                .pos(this.width / 2 - 49, this.height / 2 + 30)
+//                .size(100, 100)
+//                .build();
+//
+//
+//        this.addWidget(enterbutton);
+//    }
+        }
 
 
     public void run(){

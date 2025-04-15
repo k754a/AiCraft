@@ -9,10 +9,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 
+import static net.kallens.aiminecraft.Chatgpt.chatGPT;
+
 
 public class SummonAI {
 
-
+    String input;
     public SummonAI(CommandDispatcher<CommandSourceStack> dispatcher) {
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
 
@@ -24,6 +26,10 @@ public class SummonAI {
                             .then(Commands.literal("settings")
                                     .executes(context -> settings())
                             )
+                            .then(Commands.literal("ask")
+
+                                            .executes(context -> ask())
+                            )
             );
 
         });
@@ -33,11 +39,12 @@ public class SummonAI {
 
 
     }
-
+    static String test;
     public static int summon(CommandSourceStack source) {
         try {
 
             source.sendSuccess(() -> Component.literal("AI player '" + "name" + "' spawned successfully"), false);
+            source.sendSuccess(() -> Component.literal("this is a test" + test), false);
             return 1;
         } catch (Exception e) {
             source.sendFailure(Component.literal("Failed-" + e.getMessage()));
@@ -59,6 +66,19 @@ public class SummonAI {
                 }
 
             });
+            return 1;
+
+        } catch (Exception e) {
+
+            return 0;
+        }
+    }
+
+
+
+    public static int ask() {
+        try {
+            String test = chatGPT("test");
             return 1;
 
         } catch (Exception e) {
