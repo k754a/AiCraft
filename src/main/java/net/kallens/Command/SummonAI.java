@@ -1,6 +1,7 @@
 package net.kallens.Command;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -28,8 +29,14 @@ public class SummonAI {
                                     .executes(context -> settings())
                             )
                             .then(Commands.literal("ask")
-                                            .executes(context -> ask(context.getSource()))
+                                    .then(Commands.argument("prompt", StringArgumentType.greedyString())
+                                            .executes(context -> ask(
+                                                    context.getSource(),
+                                                    StringArgumentType.getString(context, "prompt")
+                                            ))
+                                    )
                             )
+
             );
 
         });
@@ -79,10 +86,12 @@ public class SummonAI {
         source.sendSuccess(() -> Component.literal(message), false);
     }
 
-    public static int ask(CommandSourceStack source) {
+    public static int ask(CommandSourceStack source, String prompt)
+        {
         try {
 //            String output = chatGPT("test");
-            String output = ollama("whats 5*5", "deepseek-r1:1.5b");
+            //deepseek-r1:1.5b
+            String output = ollama(prompt, SettingsScreen.TokenandID());
             source.sendSuccess(() -> Component.literal("The output is "+output), false);
 
             return 1;

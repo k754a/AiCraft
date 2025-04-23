@@ -26,7 +26,7 @@ public class SettingsScreen extends Screen {
     public SettingsScreen(Component title) {
         super(title);
     }
-    String test;
+    static String test;
 
     float textboxeslist = 2;
     @Override
@@ -128,6 +128,11 @@ public class SettingsScreen extends Screen {
 
 
         return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+
+    public static String TokenandID()
+    {
+        return test;
     }
 }
 

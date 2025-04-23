@@ -6,18 +6,16 @@ public class Ollama {
 
     public static String ollama(String prompt, String modelName) throws IOException {
         ProcessBuilder builder = new ProcessBuilder("ollama", "run", modelName);
-        builder.redirectErrorStream(true); // merge stdout + stderr for max chaos
+        builder.redirectErrorStream(true);
 
         Process process = builder.start();
 
-        // shove the prompt into the model like it owes you money
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()))) {
             writer.write(prompt);
             writer.newLine();
             writer.flush();
         }
 
-        // catch whatever the model screams back
         StringBuilder output = new StringBuilder();
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
             String line;
@@ -26,13 +24,14 @@ public class Ollama {
             }
         }
 
-        // wait for it to die peacefully
         try {
             process.waitFor();
         } catch (InterruptedException e) {
-            e.printStackTrace(); // lol chaos mode
+            e.printStackTrace();
         }
+        String cleanOutput = output.toString().replaceAll("\u001B\\[[;?0-9]*[a-zA-Z]", "");
+        return cleanOutput.trim();
 
-        return output.toString().trim();
+
     }
 }
