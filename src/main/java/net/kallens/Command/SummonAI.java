@@ -10,6 +10,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 
 import static net.kallens.aiminecraft.Chatgpt.chatGPT;
+import static net.kallens.aiminecraft.Ollama.ollama;
 
 
 public class SummonAI {
@@ -27,8 +28,7 @@ public class SummonAI {
                                     .executes(context -> settings())
                             )
                             .then(Commands.literal("ask")
-
-                                            .executes(context -> ask())
+                                            .executes(context -> ask(context.getSource()))
                             )
             );
 
@@ -74,15 +74,23 @@ public class SummonAI {
         }
     }
 
+    void sendcasts(String message, CommandSourceStack source)
+    {
+        source.sendSuccess(() -> Component.literal(message), false);
+    }
 
-
-    public static int ask() {
+    public static int ask(CommandSourceStack source) {
         try {
-            String test = chatGPT("test");
+//            String output = chatGPT("test");
+            String output = ollama("whats 5*5", "");
+            source.sendSuccess(() -> Component.literal("The output is "+output), false);
+
             return 1;
 
         } catch (Exception e) {
+            source.sendFailure(Component.literal("Failed -" + e.getMessage()));
 
+            e.printStackTrace();
             return 0;
         }
     }
