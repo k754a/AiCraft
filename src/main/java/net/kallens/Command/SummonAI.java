@@ -82,7 +82,7 @@ public class SummonAI {
     public static int ask(CommandSourceStack source) {
         try {
 //            String output = chatGPT("test");
-            String output = ollama("whats 5*5", "");
+            String output = ollama("whats 5*5", "deepseek-r1:1.5b");
             source.sendSuccess(() -> Component.literal("The output is "+output), false);
 
             return 1;

@@ -1,71 +1,38 @@
 package net.kallens.aiminecraft;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
+import java.io.*;
 
 public class Ollama {
 
-    public static String ollama(String Prompt, String ModelName) throws IOException{
-        String modelName = ModelName;
-        String prompttext = Prompt;
+    public static String ollama(String prompt, String modelName) throws IOException {
+        ProcessBuilder builder = new ProcessBuilder("ollama", "run", modelName);
+        builder.redirectErrorStream(true); // merge stdout + stderr for max chaos
 
+        Process process = builder.start();
 
-        URL url = new URL("http://localhost:11434/api/generate");
-
-        HttpURLConnection comm = (HttpURLConnection) url.openConnection();
-
-        comm.setRequestMethod("POST");
-        comm.setRequestProperty("Content-Type", "application/json; utf-8");
-        comm.setRequestProperty("Accept", "application/json");
-        comm.setDoOutput(true);
-
-        String jsonInputString = String.format(
-                "{\"model\": \"%s\", \"prompt\":\"%s\", \"stream\": false}", modelName, prompttext
-        );
-
-        try(OutputStream os = comm.getOutputStream())
-        {
-            byte[] input = jsonInputString.getBytes(StandardCharsets.UTF_8);
-            os.write(input, 0, input.length);
+        // shove the prompt into the model like it owes you money
+        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()))) {
+            writer.write(prompt);
+            writer.newLine();
+            writer.flush();
         }
 
-        int code = comm.getResponseCode();
-        System.out.println("Response Code: "+ code);
-
-        BufferedReader in = new BufferedReader(new InputStreamReader(comm.getInputStream(), StandardCharsets.UTF_8));
-        StringBuilder response = new StringBuilder();
-        String line;
-        while ((line = in.readLine()) != null)
-        {
-            response.append(line);
+        // catch whatever the model screams back
+        StringBuilder output = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                output.append(line).append("\n");
+            }
         }
-        in.close();
 
-        System.out.println("Response Body: " + response.toString());
+        // wait for it to die peacefully
+        try {
+            process.waitFor();
+        } catch (InterruptedException e) {
+            e.printStackTrace(); // lol chaos mode
+        }
 
-        JsonObject jsonResponse = JsonParser.parseString(response.toString())
-                .getAsJsonObject();
-        String responsetext = jsonResponse
-                .get("response")
-                .getAsString();
-
-
-        comm.disconnect();
-
-        return responsetext;
-
-
-
-
-
+        return output.toString().trim();
     }
 }
