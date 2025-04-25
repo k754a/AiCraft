@@ -30,6 +30,10 @@ public class Ollama {
             e.printStackTrace();
         }
         String cleanOutput = output.toString().replaceAll("\u001B\\[[;?0-9]*[a-zA-Z]", "");
+
+
+        cleanOutput = cleanOutput.replaceAll("(?s)<think>.*?</think>", "");
+
         return cleanOutput.trim();
 
 
