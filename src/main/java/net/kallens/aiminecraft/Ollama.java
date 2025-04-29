@@ -32,7 +32,12 @@ public class Ollama {
         String cleanOutput = output.toString().replaceAll("\u001B\\[[;?0-9]*[a-zA-Z]", "");
 
 
-        cleanOutput = cleanOutput.replaceAll("(?s)<think>.*?</think>", "");
+        cleanOutput = cleanOutput.substring(cleanOutput.indexOf("<") + 1);
+        cleanOutput = cleanOutput.substring(cleanOutput.indexOf("-") + 1);
+
+
+        //remove deepseak output
+        cleanOutput = cleanOutput.replaceAll("(?s)think>.*?</think>", "");
 
         return cleanOutput.trim();
 
