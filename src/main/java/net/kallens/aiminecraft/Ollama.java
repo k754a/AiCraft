@@ -1,10 +1,14 @@
 package net.kallens.aiminecraft;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
+
 import java.io.*;
 
 public class Ollama {
 
-    public static String ollama(String prompt, String modelName) throws IOException {
+    public static String ollama(String prompt, String modelName, CommandSourceStack source) throws IOException {
         ProcessBuilder builder = new ProcessBuilder("ollama", "run", modelName);
         builder.redirectErrorStream(true);
 
@@ -21,6 +25,7 @@ public class Ollama {
             String line;
             while ((line = reader.readLine()) != null) {
                 output.append(line).append("\n");
+
             }
         }
 

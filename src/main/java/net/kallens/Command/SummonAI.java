@@ -58,6 +58,16 @@ public class SummonAI {
                                     )
                             )
 
+                            .then(Commands.literal("usecommands")
+                                    .then(Commands.argument("prompt", StringArgumentType.greedyString())
+                                            .executes(context -> command(
+                                                    context.getSource(),
+                                                    StringArgumentType.getString(context, "prompt")
+
+                                            ))
+                                    )
+                            )
+
             );
 
         });
@@ -117,7 +127,7 @@ public class SummonAI {
             new Thread(() -> {
                 try {
 
-                    String output = ollama( "NOTE: PLEASE START YOUR MESSAGE WITH -, SO IT CAN BE FILTERD OUT. keep answers short and formal, and respond the best you can vs the question, now this is the question: "  + prompt, SettingsScreen.TokenandID());
+                    String output = ollama( "NOTE: PLEASE START YOUR MESSAGE WITH -, SO IT CAN BE FILTERD OUT. keep answers short and formal, and respond the best you can vs the question, now this is the question: "  + prompt, SettingsScreen.TokenandID(), source);
                     Minecraft.getInstance().execute(() -> {
                         source.sendSuccess(() -> Component.literal(output), false);
                     });
@@ -179,7 +189,10 @@ public class SummonAI {
             new Thread(() -> {
                 try {
 
-                    String output = ollama("This is the block data:" + pullChunkBlocks(overworld) + "| My pos is = " + px + ","+ py + "," + pz + " And my chunk pos vs the chunk is, "+chunkX + "," + chunkZ +"," + chunkY + " using this info of the chunk and y pos, make informal decisions on whats happening, and keep answers short and formal, and respond the best you can vs the question, NOTE: PLEASE START YOUR MESSAGE WITH -, SO IT CAN BE FILTERD OUT. now this is the question: "  + prompt, SettingsScreen.TokenandID());
+                    String output = ollama("This is the block data:" + pullChunkBlocks(overworld) + "| My pos is = " + px + ","+ py + "," + pz + " And my chunk pos vs the chunk is," +
+                            " "+chunkX + "," + chunkZ +"," + chunkY +
+                            " using this info of the chunk and y pos, make informal decisions on whats happening, and keep answers short and formal, and respond the best you can vs the question," +
+                            " NOTE: PLEASE START YOUR MESSAGE WITH -, SO IT CAN BE FILTERD OUT. ALSO REMEBER, ONLY COMMANDS, NO OTHER TEXT OR THINGS PLEASE now this is the question: "  + prompt, SettingsScreen.TokenandID(), source);
                     Minecraft.getInstance().execute(() -> {
                         source.sendSuccess(() -> Component.literal(output), false);
                     });
@@ -201,5 +214,62 @@ public class SummonAI {
             return 0;
         }
     }
+
+
+
+    public static int command(CommandSourceStack source, String prompt)
+    {
+        try {
+            Minecraft mc = Minecraft.getInstance();
+
+            MinecraftServer integratedServer = mc.getSingleplayerServer();
+
+            ServerLevel overworld = integratedServer.getLevel(Level.OVERWORLD);
+//            String output = chatGPT("test");
+            //tested with:
+            //deepseek-r1:7b
+            //gemma3:27b
+
+            // Suppose you want the chunk containing the player:
+            LocalPlayer player = Minecraft.getInstance().player;
+            double px = player.getX();
+            double pz = player.getZ();
+            double py = player.getY();
+            int chunkX = ((int)Math.floor(px)) >> 4;
+            int chunkZ = ((int)Math.floor(pz)) >> 4;
+            int chunkY = ((int)Math.floor(py)) >> 4;
+
+
+
+            new Thread(() -> {
+                try {
+
+                    String output = ollama("This is the block data:" + pullChunkBlocks(overworld) + "| My pos is = " + px + ","+ py + "," + pz + " And my chunk pos vs the chunk is," +
+                            " "+chunkX + "," + chunkZ +"," + chunkY +
+                            " using this info of the chunk and y pos, create things using any commands based on what the player wants (exept setblock) using proper minecraft syntax, and keep answers short and formal, and respond the best you can vs the question," +
+                            " NOTE: PLEASE START YOUR MESSAGE WITH -, SO IT CAN BE FILTERD OUT. ALSO REMEBER, ONLY COMMANDS, NO OTHER TEXT OR THINGS PLEASE now this is the question: "  + prompt, SettingsScreen.TokenandID(), source);
+                    Minecraft.getInstance().execute(() -> {
+                        source.sendSuccess(() -> Component.literal(output), false);
+                    });
+                } catch (Exception e) {
+                    Minecraft.getInstance().execute(() -> {
+                        source.sendFailure(Component.literal("Failed -" + e.getMessage()));
+                    });
+                    e.printStackTrace();
+                }
+            }).start();
+
+
+            return 1;
+
+        } catch (Exception e) {
+            source.sendFailure(Component.literal("Failed -" + e.getMessage()));
+
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+
 
 }
