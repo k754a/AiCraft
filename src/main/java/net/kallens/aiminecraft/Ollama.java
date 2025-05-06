@@ -26,6 +26,7 @@ public class Ollama {
             while ((line = reader.readLine()) != null) {
                 output.append(line).append("\n");
 
+
             }
         }
 

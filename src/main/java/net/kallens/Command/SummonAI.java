@@ -240,17 +240,62 @@ public class SummonAI {
             int chunkY = ((int)Math.floor(py)) >> 4;
 
 
-
+            //
             new Thread(() -> {
                 try {
+                    Minecraft.getInstance().execute(() -> {
+                        source.sendSuccess(() -> Component.literal("NOTE: Depending on the command it can take a very long time on less powerful hardware"), false);
+                        source.sendSuccess(() -> Component.literal("On a RTX 4060 it takes about 7 mins with a very complex prompt using gemma3:27b"), false);
+                    });
+                    String output = ollama(
+                            "This is the block data: " + pullChunkBlocks(overworld) +
+                                    " | My pos is = " + px + "," + py + "," + pz +
+                                    " And my chunk pos vs the chunk is, " + chunkX + "," + chunkZ + "," + chunkY +
+                                    " using this info of the chunk and y pos, using the info provided with the data, create minecraft commands to execute the prompt." +
+                                    " DO NOT USE /setblock. Only use valid Minecraft Java Edition commands that work in-game." +
+                                    " Don't say anything else, JUST commands, and each command must start with a dash (-) to be parsed." +
+                                    " Respond formally and short. Try your best to generate correct commands based on the prompt and the chunk data." +
+                                    " Some valid example commands for context include: /fill, /fill ... hollow, /execute if block, /clone, /tp, /summon, /give, /data merge block, /execute as/at, /scoreboard, /effect, /particle, /title, /playsound, etc." +
+                                    " Remeber to make the commands as efficent as possible (remever to use proper sytnax tho), like istead of generating each wall, use /fill the amount then block then use hollow at the end to make it much faster" +
+                                    " now this is the question that you must awnser/create in commands THEY ALSO MUST BE IN INT FORMAT FOR NUMBRS, NO 1.2345 as an example: " + prompt,
+                            SettingsScreen.TokenandID(),
+                            source
+                    );
 
-                    String output = ollama("This is the block data:" + pullChunkBlocks(overworld) + "| My pos is = " + px + ","+ py + "," + pz + " And my chunk pos vs the chunk is," +
-                            " "+chunkX + "," + chunkZ +"," + chunkY +
-                            " using this info of the chunk and y pos, create things using any commands based on what the player wants (exept setblock) using proper minecraft syntax, and keep answers short and formal, and respond the best you can vs the question," +
-                            " NOTE: PLEASE START YOUR MESSAGE WITH -, SO IT CAN BE FILTERD OUT. ALSO REMEBER, ONLY COMMANDS, NO OTHER TEXT OR THINGS PLEASE now this is the question: "  + prompt, SettingsScreen.TokenandID(), source);
                     Minecraft.getInstance().execute(() -> {
                         source.sendSuccess(() -> Component.literal(output), false);
                     });
+
+
+
+                    MinecraftServer server = mc.getSingleplayerServer();
+
+                    if (server != null) {
+
+                        String rawCommands = output;
+
+                        String[] commands = rawCommands.split("\n");
+                        for (String cmd : commands) {
+                            cmd = cmd.replaceAll("^\\[.*?\\]\\s*", ""); // strip [System] [CHAT]
+                            cmd = cmd.replaceFirst("^-\\s*", ""); // strip '- ' at start
+                            if (cmd.startsWith("/")) {
+                                cmd = cmd.substring(1); // remove slash if needed
+                            }
+                            server.getCommands().performPrefixedCommand(source, cmd);
+                        }
+
+
+                    }
+
+
+
+
+
+
+
+
+
+
                 } catch (Exception e) {
                     Minecraft.getInstance().execute(() -> {
                         source.sendFailure(Component.literal("Failed -" + e.getMessage()));
