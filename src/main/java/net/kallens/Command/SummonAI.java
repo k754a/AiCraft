@@ -19,6 +19,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 
+import java.io.IOException;
+
 import static net.kallens.Command.ChunkUtils.PullChunk;
 import static net.kallens.Command.PullChunkData.pullChunkBlocks;
 
@@ -37,8 +39,11 @@ public class SummonAI {
 //                            .then(Commands.literal("spawn")
 //                                    .executes(context -> summon(context.getSource()))
 //                            )
-                            .then(Commands.literal("TokenSet")//renamed from Settings to TokenSet
+                            .then(Commands.literal("tokenSet")//renamed from Settings to TokenSet
                                     .executes(context -> settings())
+                            )
+                            .then(Commands.literal("reset")//renamed from Settings to TokenSet
+                                    .executes(context -> stopcontext(context.getSource()))
                             )
                             .then(Commands.literal("ask")
                                     .then(Commands.argument("prompt", StringArgumentType.greedyString())
@@ -155,7 +160,20 @@ public class SummonAI {
 
 
 
+    public static int stopcontext(CommandSourceStack source)
+    {
+        try {
+            ollama("/clear", SettingsScreen.TokenandID(), source);
 
+            Minecraft.getInstance().execute(() -> {
+                source.sendSuccess(() -> Component.literal("model has been reset."), false);
+            });
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return 0;
+    }
 
 
 
@@ -225,7 +243,7 @@ public class SummonAI {
             MinecraftServer integratedServer = mc.getSingleplayerServer();
 
             ServerLevel overworld = integratedServer.getLevel(Level.OVERWORLD);
-//            String output = chatGPT("test");
+//            deepseek-r1:7bdeepseek-r1:7bString output = chatGPT("test");
             //tested with:
             //deepseek-r1:7b
             //gemma3:27b
@@ -240,7 +258,9 @@ public class SummonAI {
             int chunkY = ((int)Math.floor(py)) >> 4;
 
 
-            //
+            //prompt fake
+
+            String finalPrompt = prompt;
             new Thread(() -> {
                 try {
                     Minecraft.getInstance().execute(() -> {
@@ -257,10 +277,10 @@ public class SummonAI {
                                     " Respond formally and short. Try your best to generate correct commands based on the prompt and the chunk data." +
                                     " Some valid example commands for context include: /fill, /fill ... hollow, /execute if block, /clone, /tp, /summon, /give, /data merge block, /execute as/at, /scoreboard, /effect, /particle, /title, /playsound, etc." +
                                     " Remeber to make the commands as efficent as possible (remever to use proper sytnax tho), like istead of generating each wall, use /fill the amount then block then use hollow at the end to make it much faster" +
-                                    " now this is the question that you must awnser/create in commands THEY ALSO MUST BE IN INT FORMAT FOR NUMBRS, NO 1.2345 as an example: " + prompt,
+                                    " now this is the question that you must awnser/create in commands THEY ALSO MUST BE IN INT FORMAT FOR NUMBRS, NO 1.2345 as an example: " + finalPrompt,
                             SettingsScreen.TokenandID(),
                             source
-                    );
+                    ); //ask in thread
 
                     Minecraft.getInstance().execute(() -> {
                         source.sendSuccess(() -> Component.literal(output), false);
