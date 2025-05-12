@@ -1,6 +1,5 @@
 package net.kallens.aiminecraft;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 
@@ -21,12 +20,32 @@ public class Ollama {
         }
 
         StringBuilder output = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                output.append(line).append("\n");
+        StringBuilder currentWord = new StringBuilder();
+
+        // Read process output and handle it word by word
+        try (InputStreamReader reader = new InputStreamReader(process.getInputStream())) {
+            int c;
+            while ((c = reader.read()) != -1) {
+                char ch = (char) c;
+                output.append(ch);
+                String cleanOutput = currentWord.toString().replaceAll("\u001B\\[[;?0-9]*[a-zA-Z]", "");
+                cleanOutput = cleanOutput.replaceAll("[^\\x20-\\x7E]", "");
+//                cleanOutput = cleanOutput.replaceAll("25", "");
+                source.getPlayer().displayClientMessage(Component.literal("ollama: " + cleanOutput), true);
 
 
+
+
+//deepseek-r1:7b
+                // If we hit a space or punctuation, consider it a word boundary
+                if (Character.isWhitespace(ch) ) {
+                    if (currentWord.length() > 0) {
+                        currentWord.setLength(0);
+                    }
+                } else {
+                    // Add character to the current word
+                    currentWord.append(ch);
+                }
             }
         }
 
@@ -35,6 +54,9 @@ public class Ollama {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+        // Final cleaned-up output after processing
+
         String cleanOutput = output.toString().replaceAll("\u001B\\[[;?0-9]*[a-zA-Z]", "");
 
 
@@ -46,7 +68,6 @@ public class Ollama {
         cleanOutput = cleanOutput.replaceAll("(?s)think>.*?</think>", "");
 
         return cleanOutput.trim();
-
 
     }
 }

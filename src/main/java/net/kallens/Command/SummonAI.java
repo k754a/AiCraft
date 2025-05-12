@@ -248,7 +248,7 @@ public class SummonAI {
             //deepseek-r1:7b
             //gemma3:27b
 
-            // Suppose you want the chunk containing the player:
+
             LocalPlayer player = Minecraft.getInstance().player;
             double px = player.getX();
             double pz = player.getZ();
@@ -268,16 +268,24 @@ public class SummonAI {
                         source.sendSuccess(() -> Component.literal("On a RTX 4060 it takes about 7 mins with a very complex prompt using gemma3:27b"), false);
                     });
                     String output = ollama(
-                            "This is the block data: " + pullChunkBlocks(overworld) +
-                                    " | My pos is = " + px + "," + py + "," + pz +
-                                    " And my chunk pos vs the chunk is, " + chunkX + "," + chunkZ + "," + chunkY +
-                                    " using this info of the chunk and y pos, using the info provided with the data, create minecraft commands to execute the prompt." +
-                                    " DO NOT USE /setblock. Only use valid Minecraft Java Edition commands that work in-game." +
-                                    " Don't say anything else, JUST commands, and each command must start with a dash (-) to be parsed." +
-                                    " Respond formally and short. Try your best to generate correct commands based on the prompt and the chunk data." +
-                                    " Some valid example commands for context include: /fill, /fill ... hollow, /execute if block, /clone, /tp, /summon, /give, /data merge block, /execute as/at, /scoreboard, /effect, /particle, /title, /playsound, etc." +
-                                    " Remeber to make the commands as efficent as possible (remever to use proper sytnax tho), like istead of generating each wall, use /fill the amount then block then use hollow at the end to make it much faster" +
-                                    " now this is the question that you must awnser/create in commands THEY ALSO MUST BE IN INT FORMAT FOR NUMBRS, NO 1.2345 as an example: " + finalPrompt,
+
+                                    "You are generating Minecraft Java Edition commands based on the provided chunk block data and player position. Here's the information you need:\n" +
+                                            "- Chunk blocks: " + pullChunkBlocks(overworld) + "\n" +
+                                            "- Player position: " + px + ", " + py + ", " + pz + "\n" +
+                                            "- Chunk coordinates: " + chunkX + ", " + chunkY + ", " + chunkZ + "\n" +
+                                            "\nUsing ONLY this data, generate efficient, **valid in-game commands** that accomplish the following prompt:\n" +
+                                            finalPrompt + "\n\n" +
+                                            "Rules:\n" +
+                                            "- Only output Minecraft Java Edition commands.\n" +
+                                            "- NO explanations or extra text.\n" +
+                                            "- Each command MUST start with a dash (-).\n" +
+                                            "- Do NOT use /setblock. Use optimized commands like /fill, /fill ... hollow, /clone, /execute, etc.\n" +
+                                            "- Use only integer coordinates. No floats or decimals (e.g., use 64 not 64.0).\n" +
+                                            "- Commands must be compact and efficient. For example, fill a full area rather than placing blocks one by one.\n" +
+                                            "- Maintain correct command syntax.\n" +
+                                            "- Use formal tone, no fluff, just the commands.\n"
+
+                    + finalPrompt,
                             SettingsScreen.TokenandID(),
                             source
                     ); //ask in thread
@@ -296,10 +304,10 @@ public class SummonAI {
 
                         String[] commands = rawCommands.split("\n");
                         for (String cmd : commands) {
-                            cmd = cmd.replaceAll("^\\[.*?\\]\\s*", ""); // strip [System] [CHAT]
-                            cmd = cmd.replaceFirst("^-\\s*", ""); // strip '- ' at start
+                            cmd = cmd.replaceAll("^\\[.*?\\]\\s*", "");
+                            cmd = cmd.replaceFirst("^-\\s*", "");
                             if (cmd.startsWith("/")) {
-                                cmd = cmd.substring(1); // remove slash if needed
+                                cmd = cmd.substring(1);
                             }
                             server.getCommands().performPrefixedCommand(source, cmd);
                         }
