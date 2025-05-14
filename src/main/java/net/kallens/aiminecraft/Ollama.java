@@ -22,6 +22,7 @@ public class Ollama {
         StringBuilder output = new StringBuilder();
         StringBuilder currentWord = new StringBuilder();
 
+        float animation = 0;
         // Read process output and handle it word by word
         try (InputStreamReader reader = new InputStreamReader(process.getInputStream())) {
             int c;
@@ -30,7 +31,36 @@ public class Ollama {
                 output.append(ch);
                 String cleanOutput = currentWord.toString().replaceAll("\u001B\\[[;?0-9]*[a-zA-Z]", "");
                 cleanOutput = cleanOutput.replaceAll("[^\\x20-\\x7E]", "");
-//                cleanOutput = cleanOutput.replaceAll("25", "");
+                cleanOutput = cleanOutput.replaceAll(".2026", "Thinking");
+                cleanOutput = cleanOutput.replaceAll("[\\[]","");;
+
+
+                boolean containsWord = cleanOutput.contains("Thinking");
+
+                if(containsWord)
+                {
+                    if(animation >= 3 )
+                    {
+                        cleanOutput = "Thinking";
+                        animation = 0;
+                    }
+                    if(animation == 2)
+                    {
+                        cleanOutput = "Thinking.";
+                    }
+                    if(animation == 1)
+                    {
+                        cleanOutput = "Thinking..";
+                    }
+                    if(animation == 0 )
+                    {
+                        cleanOutput = "Thinking...";
+
+                    }
+                    animation++;
+                }
+
+
                 source.getPlayer().displayClientMessage(Component.literal("ollama: " + cleanOutput), true);
 
 

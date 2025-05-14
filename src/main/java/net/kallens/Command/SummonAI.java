@@ -30,6 +30,7 @@ import static net.kallens.aiminecraft.Ollama.ollama;
 
 public class SummonAI {
 
+
     String input;
     public SummonAI(CommandDispatcher<CommandSourceStack> dispatcher) {
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
@@ -234,7 +235,7 @@ public class SummonAI {
     }
 
 
-
+    private static boolean finaldisplay = true;
     public static int command(CommandSourceStack source, String prompt)
     {
         try {
@@ -263,10 +264,15 @@ public class SummonAI {
             String finalPrompt = prompt;
             new Thread(() -> {
                 try {
-                    Minecraft.getInstance().execute(() -> {
-                        source.sendSuccess(() -> Component.literal("NOTE: Depending on the command it can take a very long time on less powerful hardware"), false);
-                        source.sendSuccess(() -> Component.literal("On a RTX 4060 it takes about 7 mins with a very complex prompt using gemma3:27b"), false);
-                    });
+                    if(finaldisplay)
+                    {
+                        Minecraft.getInstance().execute(() -> {
+                            source.sendSuccess(() -> Component.literal("NOTE: Depending on the command it can take a very long time on less powerful hardware"), false);
+                            source.sendSuccess(() -> Component.literal("On a RTX 4060 it takes about 7 mins with a very complex prompt using gemma3:27b"), false);
+                        });
+                        finaldisplay = false;
+                    }
+
                     String output = ollama(
 
                                     "You are generating Minecraft Java Edition commands based on the provided chunk block data and player position. Here's the information you need:\n" +
@@ -282,13 +288,13 @@ public class SummonAI {
                                             "- Do NOT use /setblock. Use optimized commands like /fill, /fill ... hollow, /clone, /execute, etc.\n" +
                                             "- Use only integer coordinates. No floats or decimals (e.g., use 64 not 64.0).\n" +
                                             "- Commands must be compact and efficient. For example, fill a full area rather than placing blocks one by one.\n" +
-                                            "- Maintain correct command syntax.\n" +
+                                            "- Maintain correct command syntax. so make sure and double check its going to work, it should be correct like for example fill would be <pos> <pos> <pos> <pos> <block> and so on\n" +
                                             "- Use formal tone, no fluff, just the commands.\n"
 
                     + finalPrompt,
                             SettingsScreen.TokenandID(),
                             source
-                    ); //ask in thread
+                    );
 
                     Minecraft.getInstance().execute(() -> {
                         source.sendSuccess(() -> Component.literal(output), false);
