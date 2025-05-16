@@ -38,23 +38,62 @@ public class Ollama {
                 boolean containsWord = cleanOutput.contains("Thinking");
 
                 if(containsWord)
-                {
-                    if(animation >= 3 )
+                {//⡀⡄⡆⡇⣇⣧⣷⣿
+                    if(animation <= 24 && animation > 22)
                     {
-                        cleanOutput = "Thinking";
+                        cleanOutput = "Thinking ⡀";
                         animation = 0;
+
                     }
-                    if(animation == 2)
+                    if(animation <= 22 && animation > 20)
                     {
-                        cleanOutput = "Thinking.";
+                        cleanOutput = "Thinking ⡄";
                     }
-                    if(animation == 1)
+                    if(animation <= 20 && animation > 18)
                     {
-                        cleanOutput = "Thinking..";
+                        cleanOutput = "Thinking ⡇";
                     }
-                    if(animation == 0 )
+                    if(animation <= 18 && animation > 16)
                     {
-                        cleanOutput = "Thinking...";
+                        cleanOutput = "Thinking ⣇";
+
+                    }
+                    if(animation <= 16 && animation > 14)
+                    {
+                       // animation = 0;
+                        cleanOutput = "Thinking ⣧";
+                    }
+                    if(animation <= 14 && animation > 12)
+                    {
+                      //  animation = 0;
+                        cleanOutput = "Thinking ⣿";
+                    }
+                    if(animation <= 12 && animation > 10)
+                    {
+                       // animation = 0;
+                        cleanOutput = "Thinking ⣷";
+                    }
+                    if(animation <= 10 && animation > 8)
+                    {
+                      //  animation = 0;
+                        cleanOutput = "Thinking ⣧";
+                    }
+                    if(animation <= 8 && animation > 6)
+                    {
+                        cleanOutput = "Thinking ⣇";
+
+                    }
+                    if(animation <= 6 && animation > 4)
+                    {
+                        cleanOutput = "Thinking ⡇";
+                    }
+                    if(animation <= 4 && animation > 2)
+                    {
+                        cleanOutput = "Thinking ⡄";
+                    }
+                    if(animation <= 2 && animation > 0)
+                    {
+                        cleanOutput = "Thinking ⡀";
 
                     }
                     animation++;

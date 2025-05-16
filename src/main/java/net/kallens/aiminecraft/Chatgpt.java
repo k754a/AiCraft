@@ -32,7 +32,6 @@ public class Chatgpt {
             String line;
 
             StringBuffer response = new StringBuffer();
-
             while ((line = br.readLine()) != null) {
                 response.append(line);
             }
