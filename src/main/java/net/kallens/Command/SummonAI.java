@@ -289,7 +289,9 @@ public class SummonAI {
                                             "- Use only integer coordinates. No floats or decimals (e.g., use 64 not 64.0).\n" +
                                             "- Commands must be compact and efficient. For example, fill a full area rather than placing blocks one by one.\n" +
                                             "- Maintain correct command syntax. so make sure and double check its going to work, it should be correct like for example fill would be <pos> <pos> <pos> <pos> <block> and so on\n" +
-                                            "- Use formal tone, no fluff, just the commands.\n"
+                                            "- Use formal tone, no fluff, just the commands.\n " +
+                                            "- Remeber older commands and posisitons you filled and edited, for context, so you can continue to make edits things"
+
 
                     + finalPrompt,
                             SettingsScreen.TokenandID(),

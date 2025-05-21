@@ -39,10 +39,21 @@ public class Ollama {
 
                 if(containsWord)
                 {//⡀⡄⡆⡇⣇⣧⣷⣿
+                    if(animation <= 28 && animation > 26)
+                    {
+                        cleanOutput = "Thinking ⠀";
+                        animation = 0;
+
+                    }
+                    if(animation <= 26 && animation > 24)
+                    {
+                        cleanOutput = "Thinking ⠀";
+
+
+                    }
                     if(animation <= 24 && animation > 22)
                     {
                         cleanOutput = "Thinking ⡀";
-                        animation = 0;
 
                     }
                     if(animation <= 22 && animation > 20)
