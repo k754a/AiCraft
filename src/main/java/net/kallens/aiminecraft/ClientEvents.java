@@ -21,12 +21,13 @@ import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.util.WeakHashMap;
 
+
 @Mod.EventBusSubscriber(modid = "aiminecraft", value = Dist.CLIENT)
 public class ClientEvents  {
 
     // Only run the prompts folder check/creation once, twin!
-    private static boolean promptsFolderReady = false;
-    private static File promptsFolderPath = null; // assign this when you create/check the folder
+    public static boolean promptsFolderReady = false;
+    public static File promptsFolderPath = null; // assign this when you create/check the folder
 
     // keep track of which TitleScreen instances we've patched
     private static final WeakHashMap<TitleScreen, Boolean> patchedScreens = new WeakHashMap<>();
@@ -195,3 +196,5 @@ public class ClientEvents  {
         event.addListener(iconButton);
     }
 }
+
+

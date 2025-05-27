@@ -10,11 +10,16 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 
 import net.minecraft.world.entity.player.Player;
+import org.jetbrains.annotations.Debug;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 import java.util.Collections;
 
 import static com.mojang.text2speech.Narrator.LOGGER;
+import static net.kallens.Command.SummonAI.loadPromptTemplate;
 
 public class SettingsScreen extends Screen {
     public List<EditBox> textBox = new ArrayList<>();
@@ -119,6 +124,23 @@ public class SettingsScreen extends Screen {
             sendcasts("AI token has been updated!", player.createCommandSourceStack());
 
             test = textBox.get(0).getValue();
+
+            try {
+                savePromptTemplate("token", test);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+
+//            try {
+//                String template = loadPromptTemplate("analyze");
+//
+//
+//            } catch (IOException e) {
+//                throw new RuntimeException(e);
+//            }
+
+
             return super.keyPressed(256, scanCode, modifiers);
         }
         if (textBox.get(0).keyPressed(keyCode, scanCode, modifiers)) {
@@ -130,9 +152,38 @@ public class SettingsScreen extends Screen {
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
-    public static String TokenandID()
-    {
-        return test;
+    public static String TokenandID() throws IOException {
+
+        String fix = loadPromptTemplate("token");
+
+        return fix;
+
     }
+
+
+
+
+    private static void savePromptTemplate(String name, String content) throws IOException {
+        File dir = new File("../run/prompts/");
+        if (!dir.exists()) {
+            if (!dir.mkdirs()) {
+                throw new IOException("Failed to create directory: " + dir.getAbsolutePath());
+            }
+        }
+
+        File file = new File(dir, name + ".txt");
+        if (!file.exists()) {
+            if (!file.createNewFile()) {
+                throw new IOException("Failed to create file: " + file.getAbsolutePath());
+            }
+        }
+
+        try (FileWriter writer = new FileWriter(file)) {
+            writer.write(content);
+        }
+    }
+
+
+
 }
 
