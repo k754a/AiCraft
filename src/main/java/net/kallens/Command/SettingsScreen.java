@@ -165,9 +165,32 @@ public class SettingsScreen extends Screen {
 
 
 
+//for mod development
+//    private static void savePromptTemplate(String name, String content) throws IOException {
+//        File dir = new File("../run/prompts/");
+//        if (!dir.exists()) {
+//            if (!dir.mkdirs()) {
+//                throw new IOException("Failed to create directory: " + dir.getAbsolutePath());
+//            }
+//        }
+//
+//        File file = new File(dir, name + ".txt");
+//        if (!file.exists()) {
+//            if (!file.createNewFile()) {
+//                throw new IOException("Failed to create file: " + file.getAbsolutePath());
+//            }
+//        }
+//
+//        try (FileWriter writer = new FileWriter(file)) {
+//            writer.write(content);
+//        }
+//    }
+
 
     private static void savePromptTemplate(String name, String content) throws IOException {
-        File dir = new File("../run/prompts/");
+        String roamingPath = System.getenv("APPDATA");
+        File dir = new File(roamingPath + "/prompts/");
+
         if (!dir.exists()) {
             if (!dir.mkdirs()) {
                 throw new IOException("Failed to create directory: " + dir.getAbsolutePath());
@@ -185,6 +208,7 @@ public class SettingsScreen extends Screen {
             writer.write(content);
         }
     }
+
 
 
 

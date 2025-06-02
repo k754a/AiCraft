@@ -82,9 +82,25 @@ public class SummonAI {
         }
         return 0;
     }
+    //this is for mod testing
+//    public static String loadPromptTemplate(String name) throws IOException {
+//        File file = new File("../run/prompts/" + name + ".txt");
+//
+//        StringBuilder builder = new StringBuilder();
+//        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+//            String line;
+//            while ((line = reader.readLine()) != null) {
+//                builder.append(line).append("\n");
+//            }
+//        }
+//        return builder.toString();
+//    }
+
+
 
     public static String loadPromptTemplate(String name) throws IOException {
-        File file = new File("../run/prompts/" + name + ".txt");
+        String roamingPath = System.getenv("APPDATA");
+        File file = new File(roamingPath + "/prompts/" + name + ".txt");
 
         StringBuilder builder = new StringBuilder();
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
@@ -95,6 +111,7 @@ public class SummonAI {
         }
         return builder.toString();
     }
+
 
     public static int ask(CommandSourceStack source, String prompt) {
         try {
