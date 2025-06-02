@@ -155,8 +155,11 @@ public class SettingsScreen extends Screen {
     public static String TokenandID() throws IOException {
 
         String fix = loadPromptTemplate("token");
+        String cleanOutput = fix.toString().replaceAll("\n", "");
 
-        return fix;
+
+
+        return cleanOutput;
 
     }
 

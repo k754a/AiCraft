@@ -236,7 +236,7 @@ public class SummonAI {
                 e.printStackTrace();
             }
         } else {
-            System.out.println("Bruh, prompts folder not ready yet.");
+            System.out.println("Error, prompt folder does not exist.");
         }
 
         return  1;
