@@ -20,6 +20,8 @@ import java.io.FileReader;
 import java.io.IOException;
 
 import static net.kallens.Command.PullChunkData.pullChunkBlocks;
+
+import static net.kallens.aiminecraft.ClientEvents.createfolders;
 import static net.kallens.aiminecraft.Ollama.ollama;
 
 
@@ -27,6 +29,8 @@ import static net.kallens.aiminecraft.Ollama.ollama;
 public class SummonAI {
 
     public SummonAI(CommandDispatcher<CommandSourceStack> dispatcher) {
+
+
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
             dispatcher.register(
                     Commands.literal("ai")
@@ -114,6 +118,8 @@ public class SummonAI {
 
 
     public static int ask(CommandSourceStack source, String prompt) {
+        createfolders();
+
         try {
             new Thread(() -> {
                 try {
@@ -146,6 +152,9 @@ public class SummonAI {
     }
 
     public static int analyze(CommandSourceStack source, String prompt) {
+        createfolders();
+
+
         try {
             Minecraft mc = Minecraft.getInstance();
             MinecraftServer integratedServer = mc.getSingleplayerServer();
@@ -190,6 +199,9 @@ public class SummonAI {
     }
 
     public static int command(CommandSourceStack source, String prompt) {
+
+        createfolders();
+
         try {
             Minecraft mc = Minecraft.getInstance();
             MinecraftServer integratedServer = mc.getSingleplayerServer();

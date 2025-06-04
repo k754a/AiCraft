@@ -1,5 +1,8 @@
 package net.kallens.aiminecraft;
-
+import com.mojang.logging.LogUtils;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.kallens.Command.SettingsScreen;
 import net.minecraft.client.Minecraft;
@@ -8,12 +11,20 @@ import net.minecraft.client.gui.components.SplashRenderer;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraft.client.gui.components.Button;
+import org.slf4j.Logger;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+
+import java.io.IOException;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -24,6 +35,7 @@ import java.util.WeakHashMap;
 
 @Mod.EventBusSubscriber(modid = "aiminecraft", value = Dist.CLIENT)
 public class ClientEvents  {
+    private static final Logger LOGGER = LogUtils.getLogger();
 
     // Only run the prompts folder check/creation once, twin!
     public static boolean promptsFolderReady = false;
@@ -34,6 +46,23 @@ public class ClientEvents  {
 
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent event) {
+        createfolders();
+
+
+
+        if (event.phase == TickEvent.Phase.END) {
+            Minecraft mc = Minecraft.getInstance();
+            if (!mc.isRunning()) {
+                killOllamaProcess();
+
+            }
+        }
+    }
+
+
+
+    public static void createfolders()
+    {
         // *** PROMPTS FOLDER CHECK/CREATE AND FILL LOGIC ***
         if (!promptsFolderReady) {
             promptsFolderReady = true; // so it don’t run more than once, twin
@@ -188,13 +217,56 @@ public class ClientEvents  {
                             e.printStackTrace();
                         }
                     } else {
-                        System.out.println("Bruh, prompts folder not ready yet.");
+                        System.out.println("prompts folder not ready yet.");
                     }
                 }
         ).bounds(iconX, iconY, size, size).build();
 
         event.addListener(iconButton);
     }
-}
 
 
+
+    @SubscribeEvent
+    public static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+
+        player.sendSystemMessage(Component.literal("Hey! There’s a few things you need to do before using your AI."));
+
+        player.sendSystemMessage(Component.literal(
+                "1. Type **/ai settoken** and enter your Ollama AI model name.\n" +
+                        "   ➤ For example, if you’re using `gemma3:27b`, just type **gemma3:27b** — don’t include the full command like 'ollama run gemma3:27b'.\n\n" +
+
+                        "2. To ask the AI something, use:\n" +
+                        "   ➤ **/ai ask <your question>**\n\n" +
+
+                        "3. To analyze your world, use:\n" +
+                        "   ➤ **/ai analize <your question>**\n\n" +
+
+                        "4. If you want the AI to run commands in-game, make sure cheats are enabled, then use:\n" +
+                        "   ➤ **/ai usecommands <your request>**"
+        ));
+
+
+
+    }
+
+
+
+
+
+    private static void killOllamaProcess() {
+        try {
+            ProcessBuilder pb = new ProcessBuilder("taskkill", "/F", "/IM", "ollama.exe");
+            pb.start();
+            System.out.println("💀 Ollama killed when Minecraft window closed, twin!");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
+
+
+    }

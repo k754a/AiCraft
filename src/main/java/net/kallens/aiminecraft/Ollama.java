@@ -5,9 +5,14 @@ import net.minecraft.network.chat.Component;
 
 import java.io.*;
 
+import static net.kallens.aiminecraft.ClientEvents.createfolders;
+
 public class Ollama {
 
     public static String ollama(String prompt, String modelName, CommandSourceStack source) throws IOException {
+
+
+
         ProcessBuilder builder = new ProcessBuilder("ollama", "run", modelName);
         builder.redirectErrorStream(true);
 
