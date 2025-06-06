@@ -150,6 +150,31 @@ public class ClientEvents  {
     }
 
     @SubscribeEvent
+    public static void onChatScreenInit(ScreenEvent.Init.Post event) {
+        if (!(event.getScreen() instanceof net.minecraft.client.gui.screens.ChatScreen chatScreen)) return;
+
+        try {
+
+            Field inputField = net.minecraft.client.gui.screens.ChatScreen.class.getDeclaredField("input");
+            inputField.setAccessible(true);
+
+            Object input = inputField.get(chatScreen);
+            if (input instanceof net.minecraft.client.gui.components.EditBox editBox) {
+
+                editBox.setMaxLength(Integer.MAX_VALUE);
+                System.out.println("[AI Minecraft] patched chat length.");
+            } else {
+                System.out.println("[AI Minecraft] Couldn't patch chat input box (type mismatch)");
+            }
+
+        } catch (Exception e) {
+            System.out.println("[AI Minecraft] Failed to override chat input length ");
+            e.printStackTrace();
+        }
+    }
+
+
+    @SubscribeEvent
     public static void onTitleScreenRender(ScreenEvent.Render.Post event) {
         if (!(event.getScreen() instanceof TitleScreen)) return;
 

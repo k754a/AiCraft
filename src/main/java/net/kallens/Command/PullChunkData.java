@@ -41,19 +41,19 @@ public class PullChunkData {
 
         Map<String, List<BlockPos>> blockBuckets = new HashMap<>();
 
-        // iterate LOCAL chunk coords 0-15 for X and Z
+
         for (int lx = 0; lx < 16; lx++) {
             for (int y = 0; y < height; y++) {
                 for (int lz = 0; lz < 16; lz++) {
 
-                    // get blockstate FROM CHUNK at local pos, not world
+
                     BlockPos localPos = new BlockPos(lx, y, lz);
                     BlockState state = chunk.getBlockState(localPos);
 
                     Block block = state.getBlock();
                     String name = BuiltInRegistries.BLOCK.getKey(block).toString();
 
-                    // convert to world pos for output cause coords are easier to read
+
                     int wx = (cx << 4) + lx;
                     int wz = (cz << 4) + lz;
                     BlockPos worldPos = new BlockPos(wx, y, wz);

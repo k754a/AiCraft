@@ -99,9 +99,9 @@ public class SummonAI {
 //        }
 //        return builder.toString();
 //    }
+//
 
-
-
+//
     public static String loadPromptTemplate(String name) throws IOException {
         String roamingPath = System.getenv("APPDATA");
         File file = new File(roamingPath + "/prompts/" + name + ".txt");
