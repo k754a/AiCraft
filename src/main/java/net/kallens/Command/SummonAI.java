@@ -29,34 +29,30 @@ import static net.kallens.aiminecraft.Ollama.ollama;
 public class SummonAI {
 
     public SummonAI(CommandDispatcher<CommandSourceStack> dispatcher) {
-
-
-        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
-            dispatcher.register(
-                    Commands.literal("ai")
-                            .then(Commands.literal("tokenSet")
-                                    .executes(context -> settings()))
-                            .then(Commands.literal("reset")
-                                    .executes(context -> stopcontext(context.getSource())))
-                            .then(Commands.literal("ask")
-                                    .then(Commands.argument("prompt", StringArgumentType.greedyString())
-                                            .executes(context -> ask(
-                                                    context.getSource(),
-                                                    StringArgumentType.getString(context, "prompt")))))
-                            .then(Commands.literal("analyze")
-                                    .then(Commands.argument("prompt", StringArgumentType.greedyString())
-                                            .executes(context -> analyze(
-                                                    context.getSource(),
-                                                    StringArgumentType.getString(context, "prompt")))))
-                            .then(Commands.literal("usecommands")
-                                    .then(Commands.argument("prompt", StringArgumentType.greedyString())
-                                            .executes(context -> command(
-                                                    context.getSource(),
-                                                    StringArgumentType.getString(context, "prompt")))))
-                            .then(Commands.literal("changeprompt")
-                                    .executes(context -> Ingame()))
-            );
-        });
+        dispatcher.register(
+                Commands.literal("ai")
+                        .then(Commands.literal("tokenSet")
+                                .executes(context -> settings()))
+                        .then(Commands.literal("reset")
+                                .executes(context -> stopcontext(context.getSource())))
+                        .then(Commands.literal("ask")
+                                .then(Commands.argument("prompt", StringArgumentType.greedyString())
+                                        .executes(context -> ask(
+                                                context.getSource(),
+                                                StringArgumentType.getString(context, "prompt")))))
+                        .then(Commands.literal("analyze")
+                                .then(Commands.argument("prompt", StringArgumentType.greedyString())
+                                        .executes(context -> analyze(
+                                                context.getSource(),
+                                                StringArgumentType.getString(context, "prompt")))))
+                        .then(Commands.literal("usecommands")
+                                .then(Commands.argument("prompt", StringArgumentType.greedyString())
+                                        .executes(context -> command(
+                                                context.getSource(),
+                                                StringArgumentType.getString(context, "prompt")))))
+                        .then(Commands.literal("changeprompt")
+                                .executes(context -> Ingame()))
+        );
     }
 
     public static int settings() {
