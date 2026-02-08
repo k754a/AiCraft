@@ -18,11 +18,15 @@ import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.commands.CommandSourceStack;
 import org.slf4j.Logger;
 import net.minecraftforge.event.server.ServerStoppedEvent;
+import net.minecraftforge.client.event.ClientChatEvent;
 
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.kallens.Command.SummonAI;
 
 import java.io.IOException;
 import java.io.File;
@@ -30,6 +34,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
+import java.util.Locale;
 import java.util.WeakHashMap;
 
 
@@ -173,6 +178,43 @@ public class ClientEvents  {
         }
     }
 
+    @SubscribeEvent
+    public static void onClientChat(ClientChatEvent event) {
+        String message = event.getMessage();
+        if (message == null || !message.startsWith("/ai ")) {
+            return;
+        }
+
+        LocalPlayer player = Minecraft.getInstance().player;
+        if (player == null) {
+            return;
+        }
+
+        String payload = message.substring(4).trim();
+        if (payload.isEmpty()) {
+            return;
+        }
+
+        String[] parts = payload.split("\\s+", 2);
+        String sub = parts[0].toLowerCase(Locale.ROOT);
+        String prompt = parts.length > 1 ? parts[1] : "";
+
+        CommandSourceStack source = player.createCommandSourceStack();
+        boolean handled = true;
+        switch (sub) {
+            case "ask" -> SummonAI.ask(source, prompt);
+            case "analyze" -> SummonAI.analyze(source, prompt);
+            case "usecommands" -> SummonAI.command(source, prompt);
+            case "reset" -> SummonAI.stopcontext(source);
+            case "tokenset", "settoken" -> SummonAI.settings();
+            default -> handled = false;
+        }
+
+        if (handled) {
+            event.setCanceled(true);
+        }
+    }
+
 
     @SubscribeEvent
     public static void onTitleScreenRender(ScreenEvent.Render.Post event) {
@@ -266,7 +308,7 @@ public class ClientEvents  {
                         "   ➤ **/ai ask <your question>**\n\n" +
 
                         "3. To analyze your world, use:\n" +
-                        "   ➤ **/ai analize <your question>**\n\n" +
+                        "   ➤ **/ai analyze <your question>**\n\n" +
 
                         "4. If you want the AI to run commands in-game, make sure cheats are enabled, then use:\n" +
                         "   ➤ **/ai usecommands <your request>**"

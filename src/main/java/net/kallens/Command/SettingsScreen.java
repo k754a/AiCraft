@@ -1,6 +1,7 @@
 package net.kallens.Command;
 
-import net.kallens.events.IsKeyPressed;
+import net.kallens.aiminecraft.ClientEvents;
+import net.kallens.aiminecraft.UserSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -8,209 +9,243 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
-
 import net.minecraft.world.entity.player.Player;
-import org.jetbrains.annotations.Debug;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.*;
-import java.util.Collections;
-
-import static com.mojang.text2speech.Narrator.LOGGER;
-import static net.kallens.Command.SummonAI.loadPromptTemplate;
 
 public class SettingsScreen extends Screen {
-    public List<EditBox> textBox = new ArrayList<>();
+    private static final int MIN_PANEL_WIDTH = 240;
+    private static final int MAX_PANEL_WIDTH = 320;
+    private static final int MIN_ROW_HEIGHT = 20;
+    private static final int MAX_ROW_HEIGHT = 28;
+    private static final int LABEL_GAP = 4;
+    private static final int FIELD_GAP = 10;
 
-    Button enterbutton;
+    private EditBox modelBox;
+    private EditBox radiusBox;
+    private EditBox maxBlocksBox;
+    private Button streamToggle;
+    private Button autoExecToggle;
+    private Button saveButton;
+    private Button resetButton;
+    private Button openPromptsButton;
+    private Button closeButton;
 
-
+    private UserSettings settings;
+    private int panelWidth;
+    private int rowHeight;
+    private int panelHeight;
+    private int left;
+    private int top;
+    private int fieldWidth;
+    private int labelHeight;
 
     public SettingsScreen(Component title) {
         super(title);
     }
-    static String test;
 
-    float textboxeslist = 2;
     @Override
     protected void init() {
-        int boxWidth = 200;
-        textBox.clear();
+        settings = UserSettings.get();
 
-        for (int i = 0; i < textboxeslist; i++) {
-            EditBox box = new EditBox(this.font, this.width / 2 - boxWidth / 2, this.height / 2 - 10, boxWidth, 20, Component.literal(""));
-            textBox.add(box);
-            this.addWidget(box);
-        }
+        updateLayout();
 
-//        enterbutton = Button.builder(Component.literal("Submit"), button -> {
-//
-//                    if (Minecraft.getInstance() != null) {
-//                        player = Minecraft.getInstance().player;
-//                    }
-//
-//                    test = textBox.get(0).getValue();
-//                    LOGGER.info("Button clicked. Current value: " + test);
-//
-//                    if (player != null) {
-//                        sendcasts("AI token has been u3pdated!", player.createCommandSourceStack());
-//                    }
-//                })
-//                .pos(this.width / 2 - 49, this.height / 2 + 30)
-//                .size(100, 100)
-//                .build();
-//
-//
-//        this.addWidget(enterbutton);
-//    }
-        }
+        int cursorY = top + rowHeight;
 
+        modelBox = new EditBox(this.font, left + 10, cursorY + labelHeight + LABEL_GAP, fieldWidth, 20, Component.literal(""));
+        modelBox.setMaxLength(200);
+        modelBox.setValue(settings.modelName);
+        this.addRenderableWidget(modelBox);
 
-    public void run(){
+        cursorY = cursorY + labelHeight + LABEL_GAP + 20 + FIELD_GAP;
+        radiusBox = new EditBox(this.font, left + 10, cursorY + labelHeight + LABEL_GAP, fieldWidth, 20, Component.literal(""));
+        radiusBox.setMaxLength(6);
+        radiusBox.setFilter(value -> value.matches("\\d*"));
+        radiusBox.setValue(Integer.toString(settings.chunkRadiusY));
+        this.addRenderableWidget(radiusBox);
 
+        cursorY = cursorY + labelHeight + LABEL_GAP + 20 + FIELD_GAP;
+        maxBlocksBox = new EditBox(this.font, left + 10, cursorY + labelHeight + LABEL_GAP, fieldWidth, 20, Component.literal(""));
+        maxBlocksBox.setMaxLength(8);
+        maxBlocksBox.setFilter(value -> value.matches("\\d*"));
+        maxBlocksBox.setValue(Integer.toString(settings.maxBlocks));
+        this.addRenderableWidget(maxBlocksBox);
 
-//        if(textBox.get(0) != null)
-//        {
-//
-//            //LOGGER.info("Box input test: " + test);
-//
-//
-//        }
+        cursorY = cursorY + labelHeight + LABEL_GAP + 20 + FIELD_GAP + 4;
+        streamToggle = Button.builder(Component.literal(toggleLabel("Stream Output", settings.streamOutput)), button -> {
+            settings.streamOutput = !settings.streamOutput;
+            button.setMessage(Component.literal(toggleLabel("Stream Output", settings.streamOutput)));
+        }).bounds(left + 10, cursorY, fieldWidth, 20).build();
+        this.addRenderableWidget(streamToggle);
 
+        cursorY += 24;
+        autoExecToggle = Button.builder(Component.literal(toggleLabel("Auto Execute Commands", settings.autoExecuteCommands)), button -> {
+            settings.autoExecuteCommands = !settings.autoExecuteCommands;
+            button.setMessage(Component.literal(toggleLabel("Auto Execute Commands", settings.autoExecuteCommands)));
+        }).bounds(left + 10, cursorY, fieldWidth, 20).build();
+        this.addRenderableWidget(autoExecToggle);
 
+        cursorY += 30;
+        saveButton = Button.builder(Component.literal("Save"), button -> saveSettings()).bounds(left + 10, cursorY, 80, 20).build();
+        resetButton = Button.builder(Component.literal("Reset"), button -> resetDefaults()).bounds(left + 100, cursorY, 80, 20).build();
+        closeButton = Button.builder(Component.literal("Close"), button -> onClose()).bounds(left + 190, cursorY, 60, 20).build();
+        this.addRenderableWidget(saveButton);
+        this.addRenderableWidget(resetButton);
+        this.addRenderableWidget(closeButton);
 
+        cursorY += 28;
+        openPromptsButton = Button.builder(Component.literal("Open Prompts Folder"), button -> openPrompts()).bounds(left + 10, cursorY, fieldWidth, 20).build();
+        this.addRenderableWidget(openPromptsButton);
+
+        this.setInitialFocus(modelBox);
+        this.setFocused(modelBox);
+        modelBox.setFocused(true);
     }
 
-
-
     @Override
-
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+        this.renderBackground(guiGraphics, mouseX, mouseY, partialTicks);
 
-        this.renderBackground(guiGraphics);
+        updateLayout();
+        int right = left + panelWidth;
+        int bottom = top + panelHeight;
 
-        run();
+        guiGraphics.fill(left, top - 10, right, bottom, 0xFF101010);
 
         super.render(guiGraphics, mouseX, mouseY, partialTicks);
 
-        for(int i=0; i<textboxeslist;i++) {
-            textBox.get(i).render(guiGraphics, mouseX, mouseY, partialTicks);
-        }
-
+        guiGraphics.pose().pushPose();
+        guiGraphics.pose().translate(0, 0, 200);
+        guiGraphics.drawString(this.font, "AI Settings", left + 10, top - 4, 0xFFFFFF, false);
+        int labelY = top + rowHeight;
+        guiGraphics.drawString(this.font, "Model Name", left + 10, labelY, 0xF0F0F0, false);
+        labelY = labelY + labelHeight + LABEL_GAP + 20 + FIELD_GAP;
+        guiGraphics.drawString(this.font, "Chunk Radius Y", left + 10, labelY, 0xF0F0F0, false);
+        labelY = labelY + labelHeight + LABEL_GAP + 20 + FIELD_GAP;
+        guiGraphics.drawString(this.font, "Max Blocks/Chunks", left + 10, labelY, 0xF0F0F0, false);
+        guiGraphics.pose().popPose();
     }
 
-    private void renderBackground(GuiGraphics guiGraphics) {
-
+    private void updateLayout() {
+        panelWidth = Math.min(MAX_PANEL_WIDTH, Math.max(MIN_PANEL_WIDTH, this.width - 40));
+        rowHeight = Math.min(MAX_ROW_HEIGHT, Math.max(MIN_ROW_HEIGHT, (this.height - 40) / 12));
+        labelHeight = this.font.lineHeight;
+        panelHeight = rowHeight * 12;
+        left = (this.width - panelWidth) / 2;
+        top = Math.max(20, (this.height - panelHeight) / 2);
+        fieldWidth = panelWidth - 20;
     }
 
-    Player player;
-    void sendcasts(String message, CommandSourceStack source)
-    {
-        source.sendSuccess(() -> Component.literal(message), false);
-    }
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if(Minecraft.getInstance() != null)
-        {
-            player = Minecraft.getInstance().player;
-        }
-
-        if(keyCode == 257)
-        {
-            LOGGER.info("Enter");
-
-            sendcasts("AI token has been updated!", player.createCommandSourceStack());
-
-            test = textBox.get(0).getValue();
-
-            try {
-                savePromptTemplate("token", test);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-
-
-//            try {
-//                String template = loadPromptTemplate("analyze");
-//
-//
-//            } catch (IOException e) {
-//                throw new RuntimeException(e);
-//            }
-
-
-            return super.keyPressed(256, scanCode, modifiers);
-        }
-        if (textBox.get(0).keyPressed(keyCode, scanCode, modifiers)) {
+        if (keyCode == 257) {
+            saveSettings();
             return true;
         }
-
-
-
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
-    public static String TokenandID() throws IOException {
+    private void saveSettings() {
+        settings.modelName = modelBox.getValue().trim();
+        settings.chunkRadiusY = clamp(parseInt(radiusBox.getValue(), 32), 4, 128);
+        settings.maxBlocks = clamp(parseInt(maxBlocksBox.getValue(), 6000), 500, 20000);
 
-        String fix = loadPromptTemplate("token");
-        String cleanOutput = fix.toString().replaceAll("\n", "");
-
-
-
-        return cleanOutput;
-
+        try {
+            settings.save();
+            saveLegacyToken(settings.modelName);
+            sendcasts("AI settings saved.", getPlayerSource());
+        } catch (IOException e) {
+            sendcasts("Failed to save settings.", getPlayerSource());
+        }
     }
 
+    private void resetDefaults() {
+        settings.modelName = "";
+        settings.chunkRadiusY = 32;
+        settings.maxBlocks = 6000;
+        settings.streamOutput = true;
+        settings.autoExecuteCommands = true;
 
+        modelBox.setValue(settings.modelName);
+        radiusBox.setValue(Integer.toString(settings.chunkRadiusY));
+        maxBlocksBox.setValue(Integer.toString(settings.maxBlocks));
+        streamToggle.setMessage(Component.literal(toggleLabel("Stream Output", settings.streamOutput)));
+        autoExecToggle.setMessage(Component.literal(toggleLabel("Auto Execute Commands", settings.autoExecuteCommands)));
+    }
 
-//for mod development
-//    private static void savePromptTemplate(String name, String content) throws IOException {
-//        File dir = new File("../run/prompts/");
-//        if (!dir.exists()) {
-//            if (!dir.mkdirs()) {
-//                throw new IOException("Failed to create directory: " + dir.getAbsolutePath());
-//            }
-//        }
-//
-//        File file = new File(dir, name + ".txt");
-//        if (!file.exists()) {
-//            if (!file.createNewFile()) {
-//                throw new IOException("Failed to create file: " + file.getAbsolutePath());
-//            }
-//        }
-//
-//        try (FileWriter writer = new FileWriter(file)) {
-//            writer.write(content);
-//        }
-//    }
-
-
-    private static void savePromptTemplate(String name, String content) throws IOException {
-        String roamingPath = System.getenv("APPDATA");
-        File dir = new File(roamingPath + "/prompts/");
-
-        if (!dir.exists()) {
-            if (!dir.mkdirs()) {
-                throw new IOException("Failed to create directory: " + dir.getAbsolutePath());
+    private void openPrompts() {
+        File dir = ClientEvents.promptsFolderPath;
+        if (dir != null && dir.exists()) {
+            try {
+                Runtime.getRuntime().exec(new String[]{"explorer.exe", dir.getAbsolutePath()});
+            } catch (IOException e) {
+                sendcasts("Failed to open prompts folder.", getPlayerSource());
             }
         }
+    }
 
-        File file = new File(dir, name + ".txt");
-        if (!file.exists()) {
-            if (!file.createNewFile()) {
-                throw new IOException("Failed to create file: " + file.getAbsolutePath());
+    private CommandSourceStack getPlayerSource() {
+        Player player = Minecraft.getInstance().player;
+        if (player == null) {
+            return null;
+        }
+        return player.createCommandSourceStack();
+    }
+
+    private void sendcasts(String message, CommandSourceStack source) {
+        if (source != null) {
+            source.sendSuccess(() -> Component.literal(message), false);
+        }
+    }
+
+    private static int parseInt(String value, int fallback) {
+        if (value == null || value.isEmpty()) {
+            return fallback;
+        }
+        try {
+            return Integer.parseInt(value.trim());
+        } catch (NumberFormatException e) {
+            return fallback;
+        }
+    }
+
+    private static int clamp(int value, int min, int max) {
+        return Math.max(min, Math.min(max, value));
+    }
+
+    private static String toggleLabel(String name, boolean enabled) {
+        return name + ": " + (enabled ? "On" : "Off");
+    }
+
+    public static String TokenandID() {
+        String model = UserSettings.get().modelName;
+        return model == null ? "" : model.trim();
+    }
+
+    private static void saveLegacyToken(String content) throws IOException {
+        File dir = ClientEvents.promptsFolderPath;
+        if (dir == null) {
+            String roamingPath = System.getenv("APPDATA");
+            if (roamingPath == null) {
+                return;
             }
+            dir = new File(roamingPath, "prompts");
+        }
+
+        if (!dir.exists() && !dir.mkdirs()) {
+            throw new IOException("Failed to create directory: " + dir.getAbsolutePath());
+        }
+
+        File file = new File(dir, "token.txt");
+        if (!file.exists() && !file.createNewFile()) {
+            throw new IOException("Failed to create file: " + file.getAbsolutePath());
         }
 
         try (FileWriter writer = new FileWriter(file)) {
-            writer.write(content);
+            writer.write(content == null ? "" : content);
         }
     }
-
-
-
-
 }
 

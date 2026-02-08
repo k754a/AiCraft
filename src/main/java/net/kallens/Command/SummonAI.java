@@ -13,6 +13,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
+import net.kallens.aiminecraft.UserSettings;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -95,12 +96,16 @@ public class SummonAI {
 //        }
 //        return builder.toString();
 //    }
-//
+
 
 //
     public static String loadPromptTemplate(String name) throws IOException {
-        String roamingPath = System.getenv("APPDATA");
-        File file = new File(roamingPath + "/prompts/" + name + ".txt");
+        File folder = ClientEvents.promptsFolderPath;
+        if (folder == null) {
+             String roamingPath = System.getenv("APPDATA");
+             folder = new File(roamingPath, "prompts");
+        }
+        File file = new File(folder, name + ".txt");
 
         StringBuilder builder = new StringBuilder();
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
@@ -121,15 +126,11 @@ public class SummonAI {
                 try {
 
                     source.sendSuccess(() -> {
-                        try {
-                            return Component.literal( SettingsScreen.TokenandID());
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
+                        return Component.literal(SettingsScreen.TokenandID());
                     }, false);
 
                     String template = loadPromptTemplate("ask");
-                    String output = ollama(
+                        String output = ollama(
                             template.replace("{{user_prompt}}", prompt),
                             SettingsScreen.TokenandID(), source);
                     Minecraft.getInstance().execute(() ->
@@ -154,8 +155,20 @@ public class SummonAI {
         try {
             Minecraft mc = Minecraft.getInstance();
             MinecraftServer integratedServer = mc.getSingleplayerServer();
+            if (integratedServer == null) {
+                source.sendFailure(Component.literal("No integrated server available."));
+                return 0;
+            }
             ServerLevel overworld = integratedServer.getLevel(Level.OVERWORLD);
+            if (overworld == null) {
+                source.sendFailure(Component.literal("Overworld not ready."));
+                return 0;
+            }
             LocalPlayer player = mc.player;
+            if (player == null) {
+                source.sendFailure(Component.literal("Player not ready."));
+                return 0;
+            }
 
             double px = player.getX();
             double py = player.getY();
@@ -166,9 +179,10 @@ public class SummonAI {
 
             new Thread(() -> {
                 try {
-                    String template = loadPromptTemplate("analyze");
-                    String formatted = template
-                            .replace("{{chunk_blocks}}", pullChunkBlocks(overworld))
+                            UserSettings settings = UserSettings.get();
+                            String template = loadPromptTemplate("analyze");
+                        String formatted = template
+                                .replace("{{chunk_blocks}}", pullChunkBlocks(overworld, player.blockPosition(), settings.chunkRadiusY, settings.maxBlocks))
                             .replace("{{player_x}}", Integer.toString((int) px))
                             .replace("{{player_y}}", Integer.toString((int) py))
                             .replace("{{player_z}}", Integer.toString((int) pz))
@@ -201,8 +215,20 @@ public class SummonAI {
         try {
             Minecraft mc = Minecraft.getInstance();
             MinecraftServer integratedServer = mc.getSingleplayerServer();
+            if (integratedServer == null) {
+                source.sendFailure(Component.literal("No integrated server available."));
+                return 0;
+            }
             ServerLevel overworld = integratedServer.getLevel(Level.OVERWORLD);
+            if (overworld == null) {
+                source.sendFailure(Component.literal("Overworld not ready."));
+                return 0;
+            }
             LocalPlayer player = mc.player;
+            if (player == null) {
+                source.sendFailure(Component.literal("Player not ready."));
+                return 0;
+            }
 
             double px = player.getX();
             double py = player.getY();
@@ -213,9 +239,10 @@ public class SummonAI {
 
             new Thread(() -> {
                 try {
-                    String template = loadPromptTemplate("commands");
-                    String formatted = template
-                            .replace("{{chunk_blocks}}", pullChunkBlocks(overworld))
+                            UserSettings settings = UserSettings.get();
+                            String template = loadPromptTemplate("commands");
+                        String formatted = template
+                                .replace("{{chunk_blocks}}", pullChunkBlocks(overworld, player.blockPosition(), settings.chunkRadiusY, settings.maxBlocks))
                             .replace("{{player_x}}", Integer.toString((int) px))
                             .replace("{{player_y}}", Integer.toString((int) py))
                             .replace("{{player_z}}", Integer.toString((int) pz))
@@ -229,11 +256,30 @@ public class SummonAI {
                     Minecraft.getInstance().execute(() ->
                             source.sendSuccess(() -> Component.literal(output), false));
 
+                    if (!settings.autoExecuteCommands) {
+                        return;
+                    }
+
                     String[] commands = output.split("\n");
+                    boolean executedAny = false;
                     for (String cmd : commands) {
-                        cmd = cmd.replaceFirst("^-\\s*", "").trim();
-                        if (cmd.startsWith("/")) cmd = cmd.substring(1);
-                        integratedServer.getCommands().performPrefixedCommand(source, cmd);
+                        String trimmed = cmd.trim();
+                        if (!trimmed.startsWith("-")) {
+                            continue;
+                        }
+                        trimmed = trimmed.replaceFirst("^-\\s*", "").trim();
+                        if (trimmed.isEmpty()) {
+                            continue;
+                        }
+                        if (trimmed.startsWith("/")) {
+                            trimmed = trimmed.substring(1);
+                        }
+                        integratedServer.getCommands().performPrefixedCommand(source, trimmed);
+                        executedAny = true;
+                    }
+                    if (!executedAny) {
+                        Minecraft.getInstance().execute(() ->
+                                source.sendFailure(Component.literal("No commands returned. Ensure your prompt file enforces '-' per line.")));
                     }
 
                 } catch (Exception e) {

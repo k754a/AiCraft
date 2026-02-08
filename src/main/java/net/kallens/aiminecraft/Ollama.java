@@ -2,6 +2,7 @@ package net.kallens.aiminecraft;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
+import net.kallens.aiminecraft.UserSettings;
 
 import java.io.*;
 
@@ -116,7 +117,9 @@ public class Ollama {
                 }
 
 
-                source.getPlayer().displayClientMessage(Component.literal("ollama: " + cleanOutput), true);
+                if (UserSettings.get().streamOutput && source.getPlayer() != null) {
+                    source.getPlayer().displayClientMessage(Component.literal("ollama: " + cleanOutput), true);
+                }
 
 
 
@@ -143,10 +146,7 @@ public class Ollama {
         // Final cleaned-up output after processing
 
         String cleanOutput = output.toString().replaceAll("\u001B\\[[;?0-9]*[a-zA-Z]", "");
-
-
-        cleanOutput = cleanOutput.substring(cleanOutput.indexOf("<") + 1);
-        cleanOutput = cleanOutput.substring(cleanOutput.indexOf("-") + 1);
+        cleanOutput = cleanOutput.replaceAll("[\u2800-\u28FF]", "");
 
 
         //remove deepseak output
