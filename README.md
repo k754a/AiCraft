@@ -13,19 +13,18 @@ AiCraft is a Minecraft mod that brings AI functionality directly into your Minec
 
 <div align="center">
 
-### In-Game AI Interface
+
 <img src="IMAGES/2026-02-07_22.08.27.png" width="45%"> <img src="IMAGES/2026-02-07_22.08.39.png" width="45%">
 
-### AI-Powered Gameplay
+
 <img src="IMAGES/2026-02-07_22.20.10.png" width="45%"> <img src="IMAGES/2026-02-08_15.37.56.png" width="45%">
 
-### Settings & Configuration
+
 <img src="IMAGES/2026-02-08_15.38.07.png" width="45%"> <img src="IMAGES/2026-02-08_15.38.19.png" width="45%">
 
-### AI Building Assistant
 <img src="IMAGES/2026-02-08_15.41.42.png" width="45%"> <img src="IMAGES/2026-02-08_22.01.09.png" width="45%">
 
-### Advanced Features
+
 <img src="IMAGES/2026-02-08_22.01.16.png" width="45%"> <img src="IMAGES/Screenshot 2026-02-07 223641.png" width="45%">
 
 </div>
