@@ -1,6 +1,6 @@
 # AiCraft - AI in Minecraft
 
-AiCraft is a Minecraft mod that brings AI functionality directly into your Minecraft world. Use AI assistants to analyze your surroundings, get help with building, answer questions about the game, and even execute commands based on natural language prompts.
+AiCraft is a Minecraft mod that LLM's interact directly into your Minecraft world. They can analyze your surroundings, help with building, and answer questions about the game, even execute commands.
 
 ## Features
 
@@ -33,7 +33,7 @@ AiCraft is a Minecraft mod that brings AI functionality directly into your Minec
 
 - `/ai ask <prompt>` - Ask the AI a question
 - `/ai analyze <prompt>` - Analyze the current chunk with a specific prompt
-- `/ai usecommands <prompt>` - Have the AI generate and execute commands based on your request
+- `/ai usecommands <prompt>` - Have the AI generate commands
 - `/ai tokenSet` - Open settings to configure your AI model
 - `/ai reset` - Reset the AI conversation context
 
