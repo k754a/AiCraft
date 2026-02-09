@@ -88,15 +88,22 @@ public class SettingsScreen extends Screen {
         this.addRenderableWidget(autoExecToggle);
 
         cursorY += 30;
-        saveButton = Button.builder(Component.literal("Save"), button -> saveSettings()).bounds(left + 10, cursorY, 80, 20).build();
-        resetButton = Button.builder(Component.literal("Reset"), button -> resetDefaults()).bounds(left + 100, cursorY, 80, 20).build();
-        closeButton = Button.builder(Component.literal("Close"), button -> onClose()).bounds(left + 190, cursorY, 60, 20).build();
+        int rowGap = 6;
+        int rowButtonWidth = (fieldWidth - rowGap * 3) / 4;
+        int rowX = left + 10;
+
+        saveButton = Button.builder(Component.literal("Save"), button -> saveSettings())
+            .bounds(rowX, cursorY, rowButtonWidth, 20).build();
+        resetButton = Button.builder(Component.literal("Reset"), button -> resetDefaults())
+            .bounds(rowX + rowButtonWidth + rowGap, cursorY, rowButtonWidth, 20).build();
+        closeButton = Button.builder(Component.literal("Close"), button -> onClose())
+            .bounds(rowX + (rowButtonWidth + rowGap) * 2, cursorY, rowButtonWidth, 20).build();
+        openPromptsButton = Button.builder(Component.literal("Prompts"), button -> openPrompts())
+            .bounds(rowX + (rowButtonWidth + rowGap) * 3, cursorY, rowButtonWidth, 20).build();
+
         this.addRenderableWidget(saveButton);
         this.addRenderableWidget(resetButton);
         this.addRenderableWidget(closeButton);
-
-        cursorY += 28;
-        openPromptsButton = Button.builder(Component.literal("Open Prompts Folder"), button -> openPrompts()).bounds(left + 10, cursorY, fieldWidth, 20).build();
         this.addRenderableWidget(openPromptsButton);
 
         this.setInitialFocus(modelBox);

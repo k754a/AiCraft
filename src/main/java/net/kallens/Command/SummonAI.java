@@ -260,21 +260,22 @@ public class SummonAI {
                         return;
                     }
 
+                    CommandSourceStack mutedSource = source.withSuppressedOutput();
                     String[] commands = output.split("\n");
                     boolean executedAny = false;
                     for (String cmd : commands) {
                         String trimmed = cmd.trim();
-                        if (!trimmed.startsWith("-")) {
+                        if (!trimmed.matches("^[\\u2013\\u2014\\u2022*\\-].*")) {
                             continue;
                         }
-                        trimmed = trimmed.replaceFirst("^-\\s*", "").trim();
+                        trimmed = trimmed.replaceFirst("^[\\u2013\\u2014\\u2022*\\-]+\\s*", "").trim();
                         if (trimmed.isEmpty()) {
                             continue;
                         }
                         if (trimmed.startsWith("/")) {
                             trimmed = trimmed.substring(1);
                         }
-                        integratedServer.getCommands().performPrefixedCommand(source, trimmed);
+                        integratedServer.getCommands().performPrefixedCommand(mutedSource, trimmed);
                         executedAny = true;
                     }
                     if (!executedAny) {
